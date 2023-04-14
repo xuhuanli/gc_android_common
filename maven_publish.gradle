@@ -2,10 +2,10 @@ apply plugin: 'maven-publish'
 
 gradle.ext{
   maven_config = [
-      "repoUrl": "http://maven.xxx",
+      "repoUrl": "http://nexus.igancao.com/repository/3rd_party/",
       "groupId"    : "com.gancao",
-      "userName"   : "??",
-      "password"   : "??"
+      "userName"   : "developer",
+      "password"   : "72fb25481e"
   ]
 
   tools_version = [
