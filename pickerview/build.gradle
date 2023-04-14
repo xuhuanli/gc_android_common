@@ -1,0 +1,28 @@
+apply plugin: 'com.android.library'
+
+
+
+android {
+    compileSdkVersion 33
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 33
+        versionCode 34
+        versionName "4.1.9"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    api project(path: ':wheelview')
+    implementation 'androidx.annotation:annotation:1.6.0'
+}

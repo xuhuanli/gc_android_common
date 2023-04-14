@@ -1,0 +1,28 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+
+android {
+    compileSdkVersion 33
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 33
+        consumerProguardFiles 'consumer-proguard-rules.pro'
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.6.0'
+
+    // noinspection GradleCompatible
+    compileOnly 'androidx.recyclerview:recyclerview:1.2.1'
+    compileOnly 'androidx.lifecycle:lifecycle-common:2.3.1'
+}
