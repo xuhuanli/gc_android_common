@@ -10,7 +10,8 @@ gradle.ext{
 
   tools_version = [
       "rvadapter" : '1.0.0',
-      "pickerview" : '1.0.0',
+      "wheelview" : '1.0.3',
+      "pickerview" : '1.0.3',
   ]
 }
 

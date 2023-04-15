@@ -10,6 +10,16 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url 'http://nexus.igancao.com/repository/3rd_party/'
+            allowInsecureProtocol = true
+            credentials {
+                // Be sure to add these non-sensitive credentials in order to retrieve dependencies from
+                // the private repository.
+                username "developer"
+                password "72fb25481e"
+            }
+        }
     }
 }
 rootProject.name = "gc_android_common"
