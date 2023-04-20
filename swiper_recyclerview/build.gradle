@@ -1,0 +1,18 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply from: "../maven_publish.gradle"
+
+android {
+    compileSdkVersion 33
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 33
+        consumerProguardFiles 'proguard-rules.txt'
+    }
+    resourcePrefix 'x_recycler'
+}
+
+dependencies {
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+}

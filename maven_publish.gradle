@@ -12,6 +12,7 @@ gradle.ext{
       "rvadapter" : '1.0.0',
       "wheelview" : '1.0.3',
       "pickerview" : '1.0.3',
+      "swiper_recyclerview": "1.0.0"
   ]
 }
 
