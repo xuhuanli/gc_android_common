@@ -1,52 +1,53 @@
 apply plugin: 'maven-publish'
 
-gradle.ext{
-  maven_config = [
-      "repoUrl": "http://nexus.igancao.com/repository/3rd_party/",
-      "groupId"    : "com.gancao",
-      "userName"   : "developer",
-      "password"   : "72fb25481e"
-  ]
+gradle.ext {
+    maven_config = [
+            "repoUrl" : "http://nexus.igancao.com/repository/3rd_party/",
+            "groupId" : "com.gancao",
+            "userName": "developer",
+            "password": "72fb25481e"
+    ]
 
-  tools_version = [
-      "rvadapter" : '1.0.0',
-      "wheelview" : '1.0.3',
-      "pickerview" : '1.0.3',
-      "swiper_recyclerview": "1.0.0"
-  ]
+    tools_version = [
+            "rvadapter"          : '1.0.0',
+            "wheelview"          : '1.0.3',
+            "pickerview"         : '1.0.3',
+            "swiper_recyclerview": "1.0.0",
+            "gclogan"            : "1.0.1"
+    ]
 }
 
 // 打包sourcesJar任务
 task generateSourcesJar(type: Jar) {
-  from android.sourceSets.main.java.srcDirs
-  classifier 'sources'
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
 }
 
 afterEvaluate { project ->
-  publishing {
-    publications {
-      // Creates a Maven publication called "release".
-      release(MavenPublication) {
-        // Applies the component for the release build variant.
-        from components.release
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
 
-        // You can then customize attributes of the publication as shown below.
-        groupId = gradle.ext.maven_config.groupId
-        artifactId = project.name
-        version = gradle.ext.tools_version[artifactId]
+                // You can then customize attributes of the publication as shown below.
+                groupId = gradle.ext.maven_config.groupId
+                artifactId = project.name
+                version = gradle.ext.tools_version[artifactId]
 
-        artifact generateSourcesJar
-      }
-    }
-    repositories {
-      maven {
-        url gradle.ext.maven_config.repoUrl
-        credentials {
-          username = gradle.ext.maven_config.userName
-          password = gradle.ext.maven_config.password
+                artifact generateSourcesJar
+            }
         }
-        allowInsecureProtocol = true
-      }
+        repositories {
+            maven {
+                url gradle.ext.maven_config.repoUrl
+                credentials {
+                    username = gradle.ext.maven_config.userName
+                    password = gradle.ext.maven_config.password
+                }
+                allowInsecureProtocol = true
+            }
+        }
     }
-  }
 }
