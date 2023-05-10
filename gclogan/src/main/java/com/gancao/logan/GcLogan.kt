@@ -68,4 +68,8 @@ object GcLogan {
             callback(statusCode, data)
         }
     }
+
+    fun setDebug(debug: Boolean) {
+        Logan.setDebug(debug)
+    }
 }
