@@ -65,7 +65,9 @@ object GcLogan {
             versionCode,
             versionName
         ) { statusCode, data ->
-            callback(statusCode, data)
+            if (data != null) {
+                callback(statusCode, data)
+            }
         }
     }
 
