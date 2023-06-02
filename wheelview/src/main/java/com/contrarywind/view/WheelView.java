@@ -51,6 +51,8 @@ public class WheelView extends View {
     private GestureDetector gestureDetector;
     private OnItemSelectedListener onItemSelectedListener;
 
+    private OnItemSelectedListener onItemSelectedNoDelayListener;
+
     private boolean isOptions = false;
     private boolean isCenterLabel = true;
 
@@ -317,6 +319,10 @@ public class WheelView extends View {
         this.onItemSelectedListener = OnItemSelectedListener;
     }
 
+    public final void setOnItemSelectedNoDelayListener(OnItemSelectedListener OnItemSelectedNoDelayListener) {
+        this.onItemSelectedNoDelayListener = OnItemSelectedNoDelayListener;
+    }
+
     public final void setAdapter(WheelAdapter adapter) {
         this.adapter = adapter;
         reMeasure();
@@ -357,6 +363,9 @@ public class WheelView extends View {
                     onItemSelectedListener.onItemSelected(getCurrentItem());
                 }
             }, 200L);
+        }
+        if (onItemSelectedNoDelayListener != null) {
+            onItemSelectedNoDelayListener.onItemSelected(getCurrentItem());
         }
     }
 
