@@ -10,6 +10,10 @@ android {
         consumerProguardFiles 'proguard-rules.txt'
     }
     resourcePrefix 'x_recycler'
+    namespace 'com.yanzhenjie.recyclerview.x'
+    lint {
+        abortOnError false
+    }
 }
 
 dependencies {

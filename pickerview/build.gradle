@@ -7,8 +7,6 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 32
-        versionCode 34
-        versionName "4.1.9"
     }
     buildTypes {
         release {
@@ -16,7 +14,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    lintOptions {
+    namespace 'com.bigkoo.pickerview'
+    lint {
         abortOnError false
     }
 }
