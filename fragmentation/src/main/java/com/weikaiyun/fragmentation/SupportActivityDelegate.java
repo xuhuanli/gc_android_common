@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentManager;
 
 import com.weikaiyun.fragmentation.animation.FragmentAnimator;
 import com.weikaiyun.fragmentation.debug.DebugStackDelegate;
-import com.weikaiyun.fragmentation.debug.PreBubble;
 import com.weikaiyun.fragmentation.queue.Action;
 
 import java.util.List;
