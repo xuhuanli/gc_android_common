@@ -77,6 +77,9 @@ public class WheelView extends View {
     private Typeface typeface = Typeface.MONOSPACE;//字体样式，默认是等宽字体
     private int textColorOut;
     private int textColorCenter;
+
+    private int fixedItemIndex = -1; // 特殊item的索引
+    private int fixedItemTextColor; // 对某一个item设置颜色,即使它未选中
     private int dividerColor;
     private int dividerWidth;
 
@@ -510,11 +513,21 @@ public class WheelView extends View {
                     canvas.clipRect(0, 0, measuredWidth, firstLineY - translateY);
                     canvas.scale(1.0F, (float) Math.sin(radian) * SCALE_CONTENT);
                     setOutPaintStyle(offsetCoefficient, angle);
+                    if (fixedItemIndex != -1 && index == fixedItemIndex) {
+                        paintOuterText.setColor(fixedItemTextColor);
+                    } else  {
+                        paintOuterText.setColor(textColorOut);
+                    }
                     canvas.drawText(contentText, drawOutContentStart, maxTextHeight, paintOuterText);
                     canvas.restore();
                     canvas.save();
                     canvas.clipRect(0, firstLineY - translateY, measuredWidth, (int) (itemHeight));
                     canvas.scale(1.0F, (float) Math.sin(radian) * 1.0F);
+                    if (fixedItemIndex != -1 && index == fixedItemIndex) {
+                        paintCenterText.setColor(fixedItemTextColor);
+                    } else  {
+                        paintCenterText.setColor(textColorCenter);
+                    }
                     canvas.drawText(contentText, drawCenterContentStart, maxTextHeight - CENTER_CONTENT_OFFSET, paintCenterText);
                     canvas.restore();
                 } else if (translateY <= secondLineY && maxTextHeight + translateY >= secondLineY) {
@@ -522,12 +535,22 @@ public class WheelView extends View {
                     canvas.save();
                     canvas.clipRect(0, 0, measuredWidth, secondLineY - translateY);
                     canvas.scale(1.0F, (float) Math.sin(radian) * 1.0F);
+                    if (fixedItemIndex != -1 && index == fixedItemIndex) {
+                        paintCenterText.setColor(fixedItemTextColor);
+                    } else  {
+                        paintCenterText.setColor(textColorCenter);
+                    }
                     canvas.drawText(contentText, drawCenterContentStart, maxTextHeight - CENTER_CONTENT_OFFSET, paintCenterText);
                     canvas.restore();
                     canvas.save();
                     canvas.clipRect(0, secondLineY - translateY, measuredWidth, (int) (itemHeight));
                     canvas.scale(1.0F, (float) Math.sin(radian) * SCALE_CONTENT);
                     setOutPaintStyle(offsetCoefficient, angle);
+                    if (fixedItemIndex != -1 && index == fixedItemIndex) {
+                        paintOuterText.setColor(fixedItemTextColor);
+                    } else  {
+                        paintOuterText.setColor(textColorOut);
+                    }
                     canvas.drawText(contentText, drawOutContentStart, maxTextHeight, paintOuterText);
                     canvas.restore();
                 } else if (translateY >= firstLineY && maxTextHeight + translateY <= secondLineY) {
@@ -535,6 +558,11 @@ public class WheelView extends View {
                     // canvas.clipRect(0, 0, measuredWidth, maxTextHeight);
                     //让文字居中
                     float Y = maxTextHeight - CENTER_CONTENT_OFFSET;//因为圆弧角换算的向下取值，导致角度稍微有点偏差，加上画笔的基线会偏上，因此需要偏移量修正一下
+                    if (fixedItemIndex != -1 && index == fixedItemIndex) {
+                        paintCenterText.setColor(fixedItemTextColor);
+                    } else {
+                        paintCenterText.setColor(textColorCenter);
+                    }
                     canvas.drawText(contentText, drawCenterContentStart, Y, paintCenterText);
                     //设置选中项
                     selectedItem = preCurrentIndex - (itemsVisible / 2 - counter);
@@ -545,6 +573,11 @@ public class WheelView extends View {
                     canvas.scale(1.0F, (float) Math.sin(radian) * SCALE_CONTENT);
                     setOutPaintStyle(offsetCoefficient, angle);
                     // 控制文字水平偏移距离
+                    if (fixedItemIndex != -1 && index == fixedItemIndex) {
+                        paintOuterText.setColor(fixedItemTextColor);
+                    } else {
+                        paintOuterText.setColor(textColorOut);
+                    }
                     canvas.drawText(contentText, drawOutContentStart + textXOffset * offsetCoefficient, maxTextHeight, paintOuterText);
                     canvas.restore();
                 }
@@ -792,6 +825,16 @@ public class WheelView extends View {
     public void setTextColorCenter(int textColorCenter) {
         this.textColorCenter = textColorCenter;
         paintCenterText.setColor(this.textColorCenter);
+    }
+
+    /**
+     * 设置特殊的item 该位置上的item颜色值会被固定成传入的value
+     * @param index
+     * @param fixedItemTextColor
+     */
+    public void setFixedItemTextColor(int index, int fixedItemTextColor) {
+        this.fixedItemIndex = index;
+        this.fixedItemTextColor = fixedItemTextColor;
     }
 
     public void setTextXOffset(int textXOffset) {
