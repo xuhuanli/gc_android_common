@@ -21,6 +21,6 @@ android {
 }
 
 dependencies {
-    api "com.gancao:wheelview:1.0.4"
+    api "com.gancao:wheelview:1.0.5"
     implementation 'androidx.annotation:annotation:1.6.0'
 }
