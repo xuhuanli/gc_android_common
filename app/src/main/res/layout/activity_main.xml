@@ -6,13 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
+    <com.gancao.labelview.LabelView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:lv_background_color="@color/black"
+        app:lv_gravity="TOP_RIGHT"
+        app:lv_text="hahhah"
+        app:lv_text_color="@android:color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
