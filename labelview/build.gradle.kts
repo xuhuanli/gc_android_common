@@ -1,8 +1,8 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("maven-publish")
 }
+apply(from = "../maven_publish.gradle")
 
 android {
     namespace = "com.gancao.labelview"
