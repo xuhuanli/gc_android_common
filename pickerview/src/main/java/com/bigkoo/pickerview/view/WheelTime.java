@@ -28,6 +28,7 @@ public class WheelTime {
     private WheelView wv_minutes;
     private WheelView wv_seconds;
     private int gravity;
+    private boolean ignoreFix;
 
     private boolean[] type;
     private static final int DEFAULT_START_YEAR = 1900;
@@ -50,12 +51,14 @@ public class WheelTime {
     private boolean isLunarCalendar = false;
     private ISelectTimeCallback mSelectChangeCallback;
 
-    public WheelTime(View view, boolean[] type, int gravity, int textSize) {
+    // ignoreFix仅会忽略月份的补0 日期要忽略自己改代码
+    public WheelTime(View view, boolean[] type, int gravity, int textSize, boolean ignoreFix) {
         super();
         this.view = view;
         this.type = type;
         this.gravity = gravity;
         this.textSize = textSize;
+        this.ignoreFix = ignoreFix;
     }
 
     public void setLunarMode(boolean isLunarCalendar) {
@@ -271,6 +274,8 @@ public class WheelTime {
             wv_month.setCurrentItem(month);
         }
         wv_month.setGravity(gravity);
+        // 仅对月份做了忽略补0
+        wv_month.setIgnoreFix(ignoreFix);
         // 日
         wv_day = (WheelView) view.findViewById(R.id.day);
 

@@ -56,6 +56,8 @@ public class WheelView extends View {
     private boolean isOptions = false;
     private boolean isCenterLabel = true;
 
+    private boolean ignoreFix = false;
+
     // Timer mTimer;
     private ScheduledExecutorService mExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> mFuture;
@@ -653,12 +655,15 @@ public class WheelView extends View {
             return ((IPickerViewData) item).getPickerViewText();
         } else if (item instanceof Integer) {
             //如果为整形则最少保留两位数.
-            return getFixNum((int) item);
+            return getFixNum((int) item, ignoreFix);
         }
         return item.toString();
     }
 
-    private String getFixNum(int timeNum) {
+    private String getFixNum(int timeNum, boolean ignoreFix) {
+        if (ignoreFix) {
+            return String.valueOf(timeNum);
+        }
         return timeNum >= 0 && timeNum < 10 ? TIME_NUM[timeNum] : String.valueOf(timeNum);
     }
 
@@ -814,6 +819,10 @@ public class WheelView extends View {
 
     public void setIsOptions(boolean options) {
         isOptions = options;
+    }
+
+    public void setIgnoreFix(boolean ignore) {
+        ignoreFix = ignore;
     }
 
     public void setTextColorOut(int textColorOut) {

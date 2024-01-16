@@ -10,8 +10,8 @@ gradle.ext {
 
     tools_version = [
             "rvadapter"          : "1.0.1",
-            "wheelview"          : "1.0.7",
-            "pickerview"         : "1.0.7",
+            "wheelview"          : "1.0.9",
+            "pickerview"         : "1.0.9",
             "swiper_recyclerview": "1.0.1",
             "gclogan"            : "1.0.4",
             "fragmentation"      : "1.0.1",
