@@ -232,20 +232,23 @@ public class Controller {
     private void addListenerFragment() {
         //fragment监听销毁界面关闭引导层
         if (fragment != null) {
-            compatibleFragment(fragment);
-            FragmentManager fm = fragment.getChildFragmentManager();
-            ListenerFragment listenerFragment = (ListenerFragment) fm.findFragmentByTag(LISTENER_FRAGMENT);
-            if (listenerFragment == null) {
-                listenerFragment = new ListenerFragment();
-                fm.beginTransaction().add(listenerFragment, LISTENER_FRAGMENT).commitAllowingStateLoss();
-            }
-            listenerFragment.setFragmentLifecycle(new FragmentLifecycleAdapter() {
-                @Override
-                public void onDestroyView() {
-                    LogUtil.i("ListenerFragment.onDestroyView");
-                    remove();
+            try {
+                FragmentManager fm = fragment.getChildFragmentManager();
+                ListenerFragment listenerFragment = (ListenerFragment) fm.findFragmentByTag(LISTENER_FRAGMENT);
+                if (listenerFragment == null) {
+                    listenerFragment = new ListenerFragment();
+                    fm.beginTransaction().add(listenerFragment, LISTENER_FRAGMENT).commitAllowingStateLoss();
                 }
-            });
+                listenerFragment.setFragmentLifecycle(new FragmentLifecycleAdapter() {
+                    @Override
+                    public void onDestroyView() {
+                        LogUtil.i("ListenerFragment.onDestroyView");
+                        remove();
+                    }
+                });
+            } catch (Exception e) {
+                LogUtil.e("addListenerFragment occur some errors");
+            }
         }
     }
 
@@ -253,27 +256,14 @@ public class Controller {
         //隐藏引导层时移除监听fragment
         if (fragment != null) {
             FragmentManager fm = fragment.getChildFragmentManager();
-            ListenerFragment listenerFragment = (ListenerFragment) fm.findFragmentByTag(LISTENER_FRAGMENT);
-            if (listenerFragment != null) {
-                fm.beginTransaction().remove(listenerFragment).commitAllowingStateLoss();
+            try {
+                ListenerFragment listenerFragment = (ListenerFragment) fm.findFragmentByTag(LISTENER_FRAGMENT);
+                if (listenerFragment != null) {
+                    fm.beginTransaction().remove(listenerFragment).commitAllowingStateLoss();
+                }
+            } catch (Exception e) {
+                LogUtil.e("removeListenerFragment occur some errors");
             }
         }
     }
-
-    /**
-     * For bug of Fragment in Android
-     * https://issuetracker.google.com/issues/36963722
-     *
-     * @param fragment
-     */
-    private void compatibleFragment(Fragment fragment) {
-        try {
-            Field childFragmentManager = Fragment.class.getDeclaredField("mChildFragmentManager");
-            childFragmentManager.setAccessible(true);
-            childFragmentManager.set(fragment, null);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }

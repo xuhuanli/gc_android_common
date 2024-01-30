@@ -2,7 +2,9 @@ package com.gancao.gc_android_common
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.fragment.app.commit
 import com.bigkoo.pickerview.builder.TimePickerBuilder
 import java.util.Calendar
 
@@ -27,6 +29,12 @@ class MainActivity : AppCompatActivity() {
                 .isDialog(true)
                 .build()
             timePicker.show()
+        }
+        findViewById<TextView>(R.id.tv_2).setOnClickListener {
+            val fm = BlankFragment.newInstance("1", "2")
+            supportFragmentManager.commit {
+                add(R.id.container, fm)
+            }
         }
     }
 }
