@@ -61,7 +61,9 @@ public class HighlightView implements HighLight {
     @Override
     public RectF getRectF(View target) {
         if (mHole == null) {
-            throw new IllegalArgumentException("the highlight view is null!");
+            // 替换掉原先的throw 直接返回一个空的RectF
+            // throw new IllegalArgumentException("the highlight view is null!");
+            return new RectF(0f, 0f, 0f, 0f);
         }
         if (rectF == null) {
             rectF = fetchLocation(target);
