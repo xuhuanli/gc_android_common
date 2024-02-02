@@ -14,7 +14,7 @@ gradle.ext {
             "pickerview"         : "1.0.9",
             "swiper_recyclerview": "1.0.1",
             "gclogan"            : "1.0.4",
-            "fragmentation"      : "1.0.1",
+            "fragmentation"      : "1.0.2",
             "labelview"          : "1.0.0",
             "guide"              : "1.0.2",
     ]

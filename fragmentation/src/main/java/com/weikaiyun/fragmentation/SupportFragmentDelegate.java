@@ -284,6 +284,18 @@ public class SupportFragmentDelegate {
     }
 
     /**
+     * Launch an fragment for which you would like a result when it poped.
+     */
+    public void startForResult(ISupportFragment toFragment, int requestCode, @ISupportFragment.LaunchMode int launchMode) {
+        try {
+            mTransactionDelegate.dispatchStartTransaction(mFragment.getParentFragmentManager(), mSupportF,
+                    toFragment, requestCode, launchMode, TransactionDelegate.TYPE_ADD_RESULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Start the target Fragment and pop itself
      */
     public void startWithPop(ISupportFragment toFragment) {

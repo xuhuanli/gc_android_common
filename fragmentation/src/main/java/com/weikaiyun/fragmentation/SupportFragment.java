@@ -287,6 +287,13 @@ abstract public class SupportFragment extends Fragment implements ISupportFragme
     }
 
     /**
+     * Launch an fragment for which you would like a result when it popped.
+     */
+    public void startForResult(ISupportFragment toFragment, int requestCode, @ISupportFragment.LaunchMode int launchMode) {
+        mDelegate.startForResult(toFragment, requestCode, launchMode);
+    }
+
+    /**
      * Start the target Fragment and pop itself
      */
     public void startWithPop(ISupportFragment toFragment) {
