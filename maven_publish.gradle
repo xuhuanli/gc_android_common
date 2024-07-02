@@ -17,7 +17,7 @@ gradle.ext {
             "fragmentation"      : "1.0.3",
             "labelview"          : "1.0.0",
             "guide"              : "1.0.2",
-            "liveEventBus"       : "1.0.0",
+            "liveeventbus-x"     : "1.0.0",
     ]
 }
 
