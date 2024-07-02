@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply from: "../maven_publish.gradle"
 
 android {
     compileSdkVersion 34
