@@ -9,8 +9,8 @@ gradle.ext {
     ]
 
     tools_version = [
-            "bga-base-adapter"   : "1.0.1",
-            "bga-photo-picker"   : "1.0.1", // 关联bga-base-adapter
+            "bga-base-adapter"   : "1.0.2",
+            "bga-photo-picker"   : "1.0.2", // 关联bga-base-adapter
             "fragmentation"      : "1.0.4",
             "guide"              : "1.0.3",
             "labelview"          : "1.0.0",

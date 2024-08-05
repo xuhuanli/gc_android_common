@@ -11,9 +11,6 @@ android {
         consumerProguardFiles 'consumer-proguard-rules.pro'
     }
 
-    dataBinding {
-        enabled = true
-    }
     namespace 'cn.bingoogolapple.baseadapter'
     lint {
         abortOnError false
