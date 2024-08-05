@@ -3,11 +3,11 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply from: "../maven_publish.gradle"
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
 
     defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion 32
+        minSdk 23
+        targetSdk 32
         versionCode 22
         versionName "2.2.0"
     }

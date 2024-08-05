@@ -12,6 +12,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
+        maven { url 'https://jitpack.io' }
         maven {
             url 'http://nexus.igancao.com/repository/3rd_party/'
             allowInsecureProtocol = true
@@ -26,11 +27,10 @@ dependencyResolutionManagement {
 }
 rootProject.name = "gc_android_common"
 include ':app'
-include ':rvadapter'
+include ':bga-base-adapter'
 include ':wheelview'
 include ':pickerview'
 include ':swiper_recyclerview'
-include ':gclogan'
 include ':fragmentation'
 include ':labelview'
 include ':guide'

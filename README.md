@@ -16,3 +16,13 @@
 美团Logan日志
 - 做了下封装
 - 一个文件 用法直接看代码
+
+## Maven相关
+版本号 见[maven_publish.gradle](maven_publish.gradle)
+maven地址 见[maven_publish.gradle](maven_publish.gradle)
+
+## ChangeLog
+- 移除gclogan
+- rvadapter更名为[bga-base-adapter](bga-base-adapter)
+- 新增[bga-photo-picker](bga-photo-picker)模块
+- gradle文件更新

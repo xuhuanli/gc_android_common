@@ -2,11 +2,11 @@ apply plugin: 'com.android.library'
 apply from: "../maven_publish.gradle"
 
 android {
-    compileSdkVersion 34
+    compileSdk 34
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 34
+        minSdk 21
+        targetSdk 34
     }
     buildTypes {
         release {
