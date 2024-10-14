@@ -9,15 +9,16 @@ gradle.ext {
     ]
 
     tools_version = [
-            "bga-base-adapter"   : "1.0.3",
-            "bga-photo-picker"   : "1.0.3", // 关联bga-base-adapter
-            "fragmentation"      : "1.0.5",
-            "guide"              : "1.0.4",
-            "labelview"          : "1.0.1",
-            "liveeventbus-x"     : "1.0.2",
-            "pickerview"         : "1.1.2", // 关联wheelview
-            "swiper_recyclerview": "1.0.3",
-            "wheelview"          : "1.1.2",
+            "bga-base-adapter"       : "1.0.3",
+            "bga-photo-picker"       : "1.0.3", // 关联bga-base-adapter
+            "fragmentation"          : "1.0.5",
+            "guide"                  : "1.0.4",
+            "labelview"              : "1.0.1",
+            "liveeventbus-x"         : "1.0.2",
+            "pickerview"             : "1.1.2", // 关联wheelview
+            "swiper_recyclerview"    : "1.0.3",
+            "recyclerview_divider"   : "1.0.0",
+            "wheelview"              : "1.1.2",
     ]
 }
 

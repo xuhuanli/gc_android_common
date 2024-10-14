@@ -12,6 +12,9 @@
 原SwiperRecyclerView
 - AGP插件适配
 - OnItemMoveListener新增控制拖拽时滑动的速度方法
+### recyclerview_divider
+原recyclerview-flexibledivider
+- agp插件适配
 
 ## Maven相关
 版本号 见[maven_publish.gradle](maven_publish.gradle)
@@ -23,3 +26,4 @@ maven地址 见[maven_publish.gradle](maven_publish.gradle)
 - 新增[bga-photo-picker](bga-photo-picker)模块
 - gradle文件更新
 - groovy转kts
+- 新增recyclerview_divider替换原recyclerview-flexibledivider在gradle8.0+中可依赖
