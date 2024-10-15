@@ -18,6 +18,16 @@ android {
     lint {
         abortOnError = false
     }
+
+    buildTypes {
+        named("release") {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
 }
 
 dependencies {

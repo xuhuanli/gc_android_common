@@ -15,10 +15,21 @@ android {
         consumerProguardFiles("consumer-proguard-rules.pro")
     }
 
+    namespace = "cn.bingoogolapple.photopicker"
+
     lint {
         abortOnError = false
     }
-    namespace = "cn.bingoogolapple.photopicker"
+
+    buildTypes {
+        named("release") {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
 }
 
 dependencies {
