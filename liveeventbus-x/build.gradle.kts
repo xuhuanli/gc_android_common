@@ -20,6 +20,7 @@ android {
             )
         }
     }
+    namespace = "com.jeremyliao.liveeventbus"
 }
 
 dependencies {

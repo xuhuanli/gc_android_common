@@ -11,7 +11,7 @@ gradle.ext {
     tools_version = [
             "bga-base-adapter"       : "1.0.3",
             "bga-photo-picker"       : "1.0.3", // 关联bga-base-adapter
-            "circleprogressbar"      : "1.0.0", // 支持渐变色的圆形进度条
+            "circleprogressbar"      : "1.0.1", // 支持渐变色的圆形进度条
             "fragmentation"          : "1.0.5",
             "guide"                  : "1.0.4",
             "labelview"              : "1.0.1",
@@ -27,22 +27,17 @@ gradle.ext {
 // 打包sourcesJar任务
 task generateSourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier 'sources'
+    archiveClassifier.set("sources")
 }
 
 afterEvaluate { project ->
     publishing {
         publications {
-            // Creates a Maven publication called "release".
             release(MavenPublication) {
-                // Applies the component for the release build variant.
-                from components.release
-
-                // You can then customize attributes of the publication as shown below.
+                from components.findByName('release')
                 groupId = gradle.ext.maven_config.groupId
                 artifactId = project.name
                 version = gradle.ext.tools_version[artifactId]
-
                 artifact generateSourcesJar
             }
         }

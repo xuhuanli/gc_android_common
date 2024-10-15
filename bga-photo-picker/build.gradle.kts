@@ -18,6 +18,7 @@ android {
     lint {
         abortOnError = false
     }
+    namespace = "cn.bingoogolapple.photopicker"
 }
 
 dependencies {
