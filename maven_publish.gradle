@@ -19,6 +19,7 @@ gradle.ext {
             "pickerview"             : "1.1.2", // 关联wheelview
             "swiper_recyclerview"    : "1.0.3",
             "recyclerview_divider"   : "1.0.0",
+            "wavesidebar"            : "1.0.0",
             "wheelview"              : "1.1.2",
     ]
 }
