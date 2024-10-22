@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="photoLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">300dp</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="bga_snpl_itemSpanCount">4</item>
+        <item name="bga_snpl_maxItemCount">10000</item>
+        <item name="bga_snpl_itemWhiteSpacing">4dp</item>
+        <item name="bga_snpl_otherWhiteSpacing">40dp</item>
+        <item name="bga_snpl_plusDrawable">@mipmap/ic_launcher</item>
+        <item name="bga_snpl_itemCornerRadius">6dp</item>
+    </style>
+</resources>

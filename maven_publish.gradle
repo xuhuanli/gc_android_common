@@ -11,8 +11,8 @@ gradle.ext {
     ]
 
     tools_version = [
-            "bga-base-adapter"    : "1.0.3",
-            "bga-photo-picker"    : "1.0.3", // 关联bga-base-adapter
+            "bga-base-adapter"    : "1.0.4",
+            "bga-photo-picker"    : "1.0.4", // 关联bga-base-adapter
             "circleprogressbar"   : "1.0.2", // 支持渐变色的圆形进度条
             "fragmentation"       : "1.0.5",
             "guide"               : "1.0.4",
