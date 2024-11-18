@@ -18,6 +18,7 @@ gradle.ext {
             "guide"               : "1.0.4",
             "labelview"           : "1.0.1",
             "liveeventbus-x"      : "1.0.2",
+            "mzbanner"        : "1.0.0", // 仿魅族轮播图
             "pickerview"          : "1.1.2", // 关联wheelview
             "swiper_recyclerview" : "1.0.3",
             "recyclerview_divider": "1.0.0",
