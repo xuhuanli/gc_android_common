@@ -26,7 +26,11 @@ public class ActionQueue {
         mMainHandler.post(new Runnable() {
             @Override
             public void run() {
-                enqueueAction(action);
+                try {
+                    enqueueAction(action);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
