@@ -11,19 +11,20 @@ gradle.ext {
     ]
 
     tools_version = [
-            "bga-base-adapter"    : "1.0.4",
-            "bga-photo-picker"    : "1.0.4", // 关联bga-base-adapter
-            "circleprogressbar"   : "1.0.2", // 支持渐变色的圆形进度条
-            "fragmentation"       : "1.0.7",
-            "guide"               : "1.0.4",
-            "labelview"           : "1.0.1",
-            "liveeventbus-x"      : "1.0.2",
-            "mzbanner"            : "1.0.1", // 仿魅族轮播图
-            "pickerview"          : "1.1.2", // 关联wheelview
-            "swiper_recyclerview" : "1.0.3",
-            "recyclerview_divider": "1.0.0",
-            "wavesidebar"         : "1.0.0",
-            "wheelview"           : "1.1.2",
+            "bga-base-adapter"           : "1.0.4",
+            "bga-photo-picker"           : "1.0.4", // 关联bga-base-adapter
+            "circleprogressbar"          : "1.0.2", // 支持渐变色的圆形进度条
+            "fragmentation"              : "1.0.7",
+            "guide"                      : "1.0.4",
+            "labelview"                  : "1.0.1",
+            "liveeventbus-x"             : "1.0.2",
+            "mzbanner"                   : "1.0.1", // 仿魅族轮播图
+            "pickerview"                 : "1.1.2", // 关联wheelview
+            "swiper_recyclerview"        : "1.0.3",
+            "recyclerview_divider"       : "1.0.0",
+            "wavesidebar"                : "1.0.0",
+            "wheelview"                  : "1.1.2",
+            "sticky-headers-recyclerview": "1.0.0", // rv粘性头
     ]
 }
 
