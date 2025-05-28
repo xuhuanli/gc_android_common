@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
+import cn.bingoogolapple.photopicker.activity.AiPreviewActivity
 import cn.bingoogolapple.photopicker.activity.BGAPhotoPickerPreviewActivity
 import cn.bingoogolapple.photopicker.widget.BGASortableNinePhotoLayout
 import com.bigkoo.pickerview.builder.TimePickerBuilder
@@ -81,16 +82,27 @@ class MainActivity : AppCompatActivity(), BGASortableNinePhotoLayout.Delegate {
         model: String?,
         models: ArrayList<String>?
     ) {
-        sortableNinePhotoLayout?.let {
-            val intent = BGAPhotoPickerPreviewActivity.IntentBuilder(this)
+        var file=filesDir
+        var list= arrayListOf("你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字","222222")
+        startActivity(
+            AiPreviewActivity.IntentBuilder(this)
+                .saveImgDir(file)
+                .previewMaskPhotos(models)
+                .previewBottomContent(list)
                 .previewPhotos(models)
-                .selectedPhotos(models)
-                .maxChooseCount(it.maxItemCount)
-                .currentPosition(position)
-                .isFromTakePhoto(false)
+                .currentPosition(0)
                 .build()
-            startActivityForResult(intent, 100)
-        }
+        )
+//        sortableNinePhotoLayout?.let {
+//            val intent = BGAPhotoPickerPreviewActivity.IntentBuilder(this)
+//                .previewPhotos(models)
+//                .selectedPhotos(models)
+//                .maxChooseCount(it.maxItemCount)
+//                .currentPosition(position)
+//                .isFromTakePhoto(false)
+//                .build()
+//            startActivityForResult(intent, 100)
+//        }
     }
 
     override fun onNinePhotoItemExchanged(
