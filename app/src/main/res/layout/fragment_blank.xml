@@ -10,13 +10,12 @@
         android:id="@+id/tv_btn"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="@color/black"
         android:text="clickme" />
 
     <TextView
-        android:id="@+id/highlight"
+        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@color/material_dynamic_primary0"
-        android:text="highlight" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="" />
 </LinearLayout>

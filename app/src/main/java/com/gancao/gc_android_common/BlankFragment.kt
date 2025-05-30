@@ -9,6 +9,7 @@ import android.widget.TextView
 import com.app.hubert.guide.NewbieGuide
 import com.app.hubert.guide.model.GuidePage
 import com.app.hubert.guide.model.HighLight
+import com.weikaiyun.fragmentation.SupportFragment
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -19,7 +20,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [BlankFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BlankFragment : Fragment() {
+class BlankFragment : SupportFragment() {
     private var param1: String? = null
     private var param2: String? = null
 
@@ -42,21 +43,13 @@ class BlankFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<TextView>(R.id.tv_btn).setOnClickListener {
-            NewbieGuide.with(this@BlankFragment)
-                .setLabel("chant_guide")
-                .alwaysShow(true)
-                .addGuidePage(
-                    GuidePage.newInstance()
-                        .addHighLight(
-                            view.findViewById<TextView>(R.id.highlight),
-                            HighLight.Shape.ROUND_RECTANGLE, 24
-                        )
-                        .setLayoutRes(R.layout.guide_layout, R.id.cancle)
-                )
-                .build()
-                .show()
+            start(BlankFragment.newInstance(((param1?.toIntOrNull() ?: 0) + 1).toString(), ""))
+        }
+        view.findViewById<TextView>(R.id.content).run {
+            text = "BlankFragemnt $param1"
         }
     }
+
     companion object {
         /**
          * Use this factory method to create a new instance of

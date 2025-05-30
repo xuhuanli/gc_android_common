@@ -15,7 +15,7 @@ gradle.ext {
             "bga-photo-picker"           : "1.0.4", // 关联bga-base-adapter
             "blurengine"                 : "1.0.0", // 模糊引擎
             "circleprogressbar"          : "1.0.2", // 支持渐变色的圆形进度条
-            "fragmentation"              : "1.0.7",
+            "fragmentation"              : "1.0.8",
             "guide"                      : "1.0.4",
             "labelview"                  : "1.0.1",
             "liveeventbus-x"             : "1.0.2",

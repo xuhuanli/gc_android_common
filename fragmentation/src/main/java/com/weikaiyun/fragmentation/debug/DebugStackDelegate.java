@@ -1,11 +1,9 @@
 package com.weikaiyun.fragmentation.debug;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -29,7 +27,6 @@ import java.util.List;
 
 public class DebugStackDelegate implements SensorEventListener {
     private final FragmentActivity mActivity;
-    private SensorManager mSensorManager;
     private AlertDialog mStackDialog;
 
     public DebugStackDelegate(FragmentActivity activity) {
@@ -37,11 +34,6 @@ public class DebugStackDelegate implements SensorEventListener {
     }
 
     public void onCreate(int mode) {
-        if (mode != Fragmentation.SHAKE) return;
-        mSensorManager = (SensorManager) mActivity.getSystemService(Context.SENSOR_SERVICE);
-        mSensorManager.registerListener(this,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -70,9 +62,6 @@ public class DebugStackDelegate implements SensorEventListener {
     }
 
     public void onDestroy() {
-        if (mSensorManager != null) {
-            mSensorManager.unregisterListener(this);
-        }
     }
 
     @Override
@@ -108,7 +97,6 @@ public class DebugStackDelegate implements SensorEventListener {
     }
 
 
-
     private List<DebugFragmentRecord> getFragmentRecords() {
         List<DebugFragmentRecord> fragmentRecordList = new ArrayList<>();
 
@@ -139,7 +127,7 @@ public class DebugStackDelegate implements SensorEventListener {
         if (fragment != null) {
             CharSequence name = fragment.getClass().getSimpleName();
 
-            if (fragment instanceof ISupportFragment && ((ISupportFragment)fragment).getSupportDelegate().isVisible()) {
+            if (fragment instanceof ISupportFragment && ((ISupportFragment) fragment).getSupportDelegate().isVisible()) {
                 name = span(name, " ☀");
             }
 

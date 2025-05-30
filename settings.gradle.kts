@@ -2,8 +2,6 @@ pluginManagement {
     repositories {
         google()
         mavenCentral()
-        // Warning: this repository is going to shut down soon
-        jcenter()
         gradlePluginPortal()
     }
 }
@@ -13,8 +11,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Warning: this repository is going to shut down soon
-        jcenter()
+        // 阿里云jcenter镜像 需要加快依然在jcenter第三方lib的升级速度
+        maven(url = "https://maven.aliyun.com/repository/jcenter")
         maven(url = "https://jitpack.io")
         maven {
             url = uri("http://nexus.igancao.com/repository/3rd_party/")
