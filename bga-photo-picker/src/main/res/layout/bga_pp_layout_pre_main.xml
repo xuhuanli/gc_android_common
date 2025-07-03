@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#000000"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/back_image"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:src="@drawable/bga_pp_icon_x_close" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_toLeftOf="@+id/iv_photo_preview_download"
+            android:layout_toRightOf="@+id/back_image"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_photo_preview_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:paddingRight="@dimen/bga_pp_size_level1"
+                android:singleLine="true"
+                android:textColor="@color/bga_pp_common_textColor"
+                android:textSize="14sp"
+                tools:text="@string/bga_pp_view_photo" />
+
+            <TextView
+                android:id="@+id/renson_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_photo_preview_title"
+                android:layout_centerHorizontal="true"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:paddingRight="@dimen/bga_pp_size_level1"
+                android:singleLine="true"
+                android:textColor="@color/bga_pp_common_textColor"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:text="@string/bga_pp_view_photo" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/iv_photo_preview_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:paddingLeft="@dimen/bga_pp_size_level3"
+            android:paddingRight="@dimen/bga_pp_size_level3"
+            android:src="@mipmap/bga_pp_ic_download" />
+    </RelativeLayout>
+
+    <cn.bingoogolapple.photopicker.widget.BGAHackyViewPager
+        android:id="@+id/hvp_photo_preview_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#000000"
+        android:overScrollMode="never" />
+
+    <TextView
+        android:id="@+id/desc_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bga_pp_desc_show"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="12dp"
+        android:visibility="gone"
+        android:ellipsize="end"
+        android:lineSpacingExtra="2dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="33dp"
+        android:maxLines="2"
+        android:text="我是一条说明文案哈哈哈哈哈哈我是一条说明文案哈哈哈哈哈哈我是一条说明文案哈哈哈哈哈哈我是一条说明文案哈哈哈哈哈哈"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>
