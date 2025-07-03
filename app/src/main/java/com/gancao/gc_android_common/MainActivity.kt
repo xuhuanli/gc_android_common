@@ -122,7 +122,6 @@ class MainActivity : AppCompatActivity(), BGASortableNinePhotoLayout.Delegate {
     protected open fun openGallery(maxCount: Int = 9, callback: ((List<File>) -> Unit)? = null) {
         PictureSelector.create(this)
             .openGallery(SelectMimeType.ofImage())
-            .setImageEngine(GlideEngine.createGlideEngine())
             .setMaxSelectNum(maxCount)
             .forResult(object : OnResultCallbackListener<LocalMedia> {
                 override fun onResult(result: ArrayList<LocalMedia>?) {
