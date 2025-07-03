@@ -56,7 +56,7 @@
         </activity>
         <!-- 图片预览界面 -->
         <activity
-            android:name="cn.bingoogolapple.photopicker.activity.NewPreviewActivity"
+            android:name="cn.bingoogolapple.photopicker.activity.BGAPreviewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/BGAPPTheme"

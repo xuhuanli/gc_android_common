@@ -6,7 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
-import cn.bingoogolapple.photopicker.activity.NewPreviewActivity
+import cn.bingoogolapple.photopicker.activity.BGAPreviewActivity
 import cn.bingoogolapple.photopicker.widget.BGASortableNinePhotoLayout
 import com.bigkoo.pickerview.builder.TimePickerBuilder
 import com.bumptech.glide.Glide
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(), BGASortableNinePhotoLayout.Delegate {
         var file=filesDir
         var list= arrayListOf("你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字","222222")
         startActivity(
-            NewPreviewActivity.IntentBuilder(this)
+            BGAPreviewActivity.IntentBuilder(this)
                 .saveImgDir(file)
                 .previewMaskPhotos(models)
                 .previewBottomContent(list)

@@ -34,7 +34,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
  * date:2025/3/12
  * time:15:09
  */
-public class NewPreviewActivity extends BGAPPToolbarActivity implements PhotoViewAttacher.OnViewTapListener, BGAAsyncTask.Callback<Void> {
+public class BGAPreviewActivity extends BGAPPToolbarActivity implements PhotoViewAttacher.OnViewTapListener, BGAAsyncTask.Callback<Void> {
     private static final String EXTRA_SAVE_PHOTO_DIR = "EXTRA_SAVE_PHOTO_DIR";
     private static final String EXTRA_PREVIEW_PHOTOS = "EXTRA_PREVIEW_PHOTOS";
     private static final String EXTRA_CURRENT_POSITION = "EXTRA_CURRENT_POSITION";
@@ -61,7 +61,7 @@ public class NewPreviewActivity extends BGAPPToolbarActivity implements PhotoVie
         private Intent mIntent;
 
         public IntentBuilder(Context context) {
-            mIntent = new Intent(context, NewPreviewActivity.class);
+            mIntent = new Intent(context, BGAPreviewActivity.class);
         }
 
         /**
@@ -120,7 +120,7 @@ public class NewPreviewActivity extends BGAPPToolbarActivity implements PhotoVie
 
     @Override
     protected void initView(Bundle savedInstanceState) {
-        setContentView(R.layout.layout_pre_main);
+        setContentView(R.layout.bga_pp_layout_pre_main);
         mContentHvp = findViewById(R.id.hvp_photo_preview_content);
         mTitleTv = findViewById(R.id.tv_photo_preview_title);
         mSub = findViewById(R.id.renson_text);
