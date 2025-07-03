@@ -1,14 +1,10 @@
 package com.gancao.gc_android_common
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.app.hubert.guide.NewbieGuide
-import com.app.hubert.guide.model.GuidePage
-import com.app.hubert.guide.model.HighLight
 import com.weikaiyun.fragmentation.SupportFragment
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -43,10 +39,11 @@ class BlankFragment : SupportFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<TextView>(R.id.tv_btn).setOnClickListener {
-            start(BlankFragment.newInstance(((param1?.toIntOrNull() ?: 0) + 1).toString(), ""))
         }
         view.findViewById<TextView>(R.id.content).run {
             text = "BlankFragemnt $param1"
+            setOnClickListener {
+            }
         }
     }
 
