@@ -1,16 +1,17 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 apply(from = "../maven_publish.gradle")
 
 android {
-    compileSdk = 34
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         renderscriptTargetApi = 30
         renderscriptSupportModeEnabled = true
-        minSdk = 21
+        minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("proguard-rules.txt")
     }
 

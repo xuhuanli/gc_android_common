@@ -99,6 +99,7 @@ abstract public class SupportActivity extends AppCompatActivity implements ISupp
      */
     @Override
     final public void onBackPressed() {
+        super.onBackPressed();
         mDelegate.onBackPressed();
     }
 

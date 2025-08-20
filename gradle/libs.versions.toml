@@ -1,0 +1,266 @@
+[versions]
+compileSdk = "36"
+targetSdk = "34"
+minSdk = "24"
+androidGradlePlugin = "8.12.1"
+growingioPlugin = "2.10.2"
+huaweiAgcp = "1.9.1.301"
+honorPlugin = "2.0.1.300"
+activity = "1.9.2"
+appcompat = "1.7.0"
+glide = "4.12.0"
+kotlin = "2.0.21"
+ksp = "2.0.21-1.0.28" # 前部分需要和kotlin版本号一致
+material = "1.13.0-alpha09"
+constraintlayout = "2.2.1"
+exifinterface = "1.3.7"
+recyclerview = "1.3.2"
+swiperefreshlayout = "1.1.0"
+lifecycleVersion = "2.8.6"
+room = "2.6.1"
+paging = "3.3.6"
+coroutines = "1.8.0"
+hptcomponentlib = "0.0.5"
+hpttag = "0.0.5"
+hptbutton = "0.0.6"
+hptbadge = "0.1.3"
+permissionsdispatcher = "4.8.0"
+retrofit = "2.11.0"
+loggingInterceptor = "4.12.0"
+gson = "2.10.1"
+timber = "5.0.1"
+viewpager2 = "1.1.0"
+window = "1.3.0"
+x5Webview = "44286"
+autosize = "v1.2.1"
+flowlayout = "1.3.1"
+refreshlayout = "2.0.5"
+ykfsdk = "4.9.6"
+xupdate = "2.1.3"
+xupdateApi = "1.0.1"
+luban = "1.1.8"
+stickyheader = "1.0.0"
+pinyin = "2.0.3"
+jpush = "5.3.1"
+umCommon = "9.8.5"
+umAsms = "1.8.7.2"
+umApm = "2.0.4"
+wxpay = "+"
+nimVersion = "9.20.12"
+nertc = "5.8.21"
+callui = "2.5.1"
+sqlcipher = "4.6.1"
+hms = "6.12.0.300"
+commonsCodec = "1.11"
+appBadge = "1.1.22"
+touchImageView = "2.3.0"
+signature = "1.3.1"
+richeditor = "2.0.0"
+zxingEmbedded = "3.6.0"
+zxing = "3.4.1"
+player = "3.1.0"
+blurengine = "1.0.1"
+ucrop = "2.2.6"
+yzX5sdk = "7.10.0"
+autotrack = "autotrack-2.10.2"
+hilt = "2.51.1"
+hiltWorkder = "1.0.0"
+fragmentKtx = "1.8.4"
+flexbox = "3.0.0"
+camerax = "1.5.0-alpha03"
+alipay = "+"
+v4legacy = "1.0.0"
+fastjson = "1.2.83"
+fresco = "2.5.0"
+webkit = "1.5.0"
+honorpush = "8.0.12.307"
+alilog = "2.7.1"
+mmkv = "2.1.0"
+workmanager = "2.9.1"
+
+swiperRecyclerview = "1.0.2"
+fragmentation = "1.0.8"
+labelview = "1.0.1"
+pickerview = "1.1.1"
+guide = "1.0.3"
+liveEventbus = "1.0.1"
+bgaAdapter = "1.0.4"
+bgaPhotoPicker = "1.0.5"
+recyclerviewDivider = "1.0.0"
+circleprogressbar = "1.0.2"
+wavesidebar = "1.0.0"
+banner = "1.0.1"
+markwon = "4.6.2"
+
+#debugtool
+leakcanary = "2.14"
+bugsnag = "5.31.3"
+# UT
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.5.1"
+
+[libraries]
+# kotlin bom
+kotlin-bom = { group = "org.jetbrains.kotlin", name = "kotlin-bom", version.ref = "kotlin" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect" } # 版本由bom指定
+
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+glideCompiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycleVersion" }
+lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "lifecycleVersion" }
+lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleVersion" }
+androidx-window = { module = "androidx.window:window", version.ref = "window" }
+
+room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+roomKtx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+roomCompiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+paging = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "paging" }
+coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+permissionsdispatcher = { group = "com.github.permissions-dispatcher", name = "permissionsdispatcher", version.ref = "permissionsdispatcher" }
+permissionsdispatcher-processor = { group = "com.github.permissions-dispatcher", name = "permissionsdispatcher-processor", version.ref = "permissionsdispatcher" }
+# network retrofit bom
+retrofit-bom = { group = "com.squareup.retrofit2", name = "retrofit-bom", version.ref = "retrofit" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit" }
+# gson-converter用自己的
+# retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson" }
+retrofit-converter-scalars = { group = "com.squareup.retrofit2", name = "converter-scalars" }
+logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "loggingInterceptor" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+tbssdk = { group = "com.tencent.tbs", name = "tbssdk", version.ref = "x5Webview" }
+autosize = { group = "com.github.JessYanCoding", name = "AndroidAutoSize", version.ref = "autosize" }
+flowlayout = { group = "com.nex3z", name = "flow-layout", version.ref = "flowlayout" } # 待移除 较困难
+refreshlayout = { group = "io.github.scwang90", name = "refresh-layout-kernel", version.ref = "refreshlayout" }
+refreshHeaderClassics = { group = "io.github.scwang90", name = "refresh-header-classics", version.ref = "refreshlayout" }
+ykfsdk = { group = "com.github.7moor-tech", name = "7moor_visitorIm_sdk", version.ref = "ykfsdk" }
+xupdate = { group = "com.github.xuexiangjys", name = "XUpdate", version.ref = "xupdate" }
+xupdateEasy = { group = "com.github.xuexiangjys.XUpdateAPI", name = "xupdate-easy", version.ref = "xupdateApi" }
+xupdateDownload = { group = "com.github.xuexiangjys.XUpdateAPI", name = "xupdate-downloader-aria", version.ref = "xupdateApi" }
+luban = { group = "com.github.Curzibn", name = "Luban", version.ref = "luban" }
+
+pinyin = { group = "com.github.promeg", name = "tinypinyin", version.ref = "pinyin" }
+jpush = { group = "cn.jiguang.sdk", name = "jpush", version.ref = "jpush" }
+umCommon = { group = "com.umeng.umsdk", name = "common", version.ref = "umCommon" }
+umAsms = { group = "com.umeng.umsdk", name = "asms", version.ref = "umAsms" }
+umApm = { group = "com.umeng.umsdk", name = "apm", version.ref = "umApm" }
+wxPay = { group = "com.tencent.mm.opensdk", name = "wechat-sdk-android", version.ref = "wxpay" }
+# 基础功能 (必需)
+nimBase = { group = "com.netease.nimlib", name = "basesdk", version.ref = "nimVersion" }
+# 通过云信来集成小米等厂商推送需要
+nimPush = { group = "com.netease.nimlib", name = "push", version.ref = "nimVersion" }
+avsignalling = { group = "com.netease.nimlib", name = "avsignalling", version.ref = "nimVersion" }
+nertc = { group = "com.netease.yunxin", name = "nertc-base", version.ref = "nertc" }
+callui = { group = "com.netease.yunxin.kit.call", name = "call-ui", version.ref = "callui" }
+sqlcipher = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "sqlcipher" }
+hms = { group = "com.huawei.hms", name = "push", version.ref = "hms" }
+# 云信 oppo推送依赖
+commonsCodec = { group = "commons-codec", name = "commons-codec", version.ref = "commonsCodec" }
+# app角标
+appBadge = { group = "me.leolin", name = "ShortcutBadger", version.ref = "appBadge" }
+touchImageView = { group = "com.github.MikeOrtiz", name = "TouchImageView", version.ref = "touchImageView" }
+signature = { group = "com.github.gcacace", name = "signature-pad", version.ref = "signature" }
+richeditor = { group = "jp.wasabeef", name = "richeditor-android", version.ref = "richeditor" }
+zxing = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+zxingEmbedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxingEmbedded" }
+player = { group = "com.kunminx.player", name = "player", version.ref = "player" }
+ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "ucrop" }
+yzX5sdk = { group = "com.youzanyun.open.mobile", name = "x5sdk", version.ref = "yzX5sdk" }
+# 无埋点SDK
+autotrack = { group = "com.growingio.android", name = "vds-android-agent", version.ref = "autotrack" }
+# hilt
+hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hiltCompiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hiltWorker = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWorkder" }
+hiltWorkerCompiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWorkder" }
+# workmanager
+workmanager = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workmanager" }
+# workmanager-test
+workmanager-test = { group = "androidx.work", name = "work-testing", version.ref = "workmanager" }
+# fragmentKtx
+fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
+flexbox = { group = "com.google.android.flexbox", name = "flexbox", version.ref = "flexbox" }
+# camerax
+camerax = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+cameraxView = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+cameraxLifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+cameraxExt = { group = "androidx.camera", name = "camera-extensions", version.ref = "camerax" }
+# alipay
+alipay = { group = "com.alipay.sdk", name = "alipaysdk-android", version.ref = "alipay" }
+# uniapp
+v4legacy = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "v4legacy" }
+fastjson = { group = "com.alibaba", name = "fastjson", version.ref = "fastjson" }
+fresco = { group = "com.facebook.fresco", name = "fresco", version.ref = "fresco" }
+frescoGif = { group = "com.facebook.fresco", name = "animated-gif", version.ref = "fresco" }
+webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
+# 荣耀推送
+honorpush = { group = "com.hihonor.mcs", name = "push", version.ref = "honorpush" }
+# 阿里云日志
+alilog = { group = "io.github.aliyun-sls", name = "aliyun-log-android-sdk", version.ref = "alilog" }
+# MMKV
+mmkv = { group = "com.tencent", name = "mmkv", version.ref = "mmkv" }
+# 内部ui组件
+hptcomponentlib = { group = "io.igancao.component", name = "hptcomponentlib", version.ref = "hptcomponentlib" }
+hpttag = { group = "io.igancao.component", name = "hpttag", version.ref = "hpttag" }
+hptbutton = { group = "io.igancao.component", name = "hptbutton", version.ref = "hptbutton" }
+hptbadge = { group = "io.igancao.component", name = "hptbadge", version.ref = "hptbadge" }
+# 内部第三方 一般都是修改了别人后重新打包的
+# 无 直接重写了一个labelview
+labelview = { group = "com.gancao", name = "labelview", version.ref = "labelview" }
+# com.contrarywind:Android-PickerView
+pickerview = { group = "com.gancao", name = "pickerview", version.ref = "pickerview" }
+# com.yanzhenjie.recyclerview:x
+swiperRecyclerview = { group = "com.gancao", name = "swiper_recyclerview", version.ref = "swiperRecyclerview" }
+# com.github.weikaiyun.SFragmentation:fragmentation:1.8.4
+fragmentation = { group = "com.gancao", name = "fragmentation", version.ref = "fragmentation" }
+# com.github.huburt-Hu:NewbieGuide
+guide = { group = "com.gancao", name = "guide", version.ref = "guide" }
+# io.github.jeremyliao:live-event-bus-x
+liveEventbus = { group = "com.gancao", name = "liveeventbus-x", version.ref = "liveEventbus" }
+# com.github.bingoogolapple:BGABaseAdapter-Android
+bgaAdapter = { group = "com.gancao", name = "bga-base-adapter", version.ref = "bgaAdapter" }
+# com.github.bingoogolapple:BGAPhotoPicker-Android
+bgaPhotoPicker = { group = "com.gancao", name = "bga-photo-picker", version.ref = "bgaPhotoPicker" }
+# com.yqritc:recyclerview-flexibledivider
+recyclerview-divider = { group = "com.gancao", name = "recyclerview_divider", version.ref = "recyclerviewDivider" }
+# com.dinuscxj:circleprogressbar
+circleprogressbar = { group = "com.gancao", name = "circleprogressbar", version.ref = "circleprogressbar" }
+# com.gjiazhe.wavesidebar
+wavesidebar = { group = "com.gancao", name = "wavesidebar", version.ref = "wavesidebar" }
+# com.timehop.stickyheadersrecyclerview
+stickyheader = { group = "com.gancao", name = "sticky-headers-recyclerview", version.ref = "stickyheader" }
+# com.github.pinguo-zhouwei:MZBannerView
+banner = { group = "com.gancao", name = "mzbanner", version.ref = "banner" }
+# fr.tvbarthel.blurdialogfragment
+blurengine = { group = "com.gancao", name = "blurengine", version.ref = "blurengine" }
+# markwon
+markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
+
+# debugtool
+leakcanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
+bugsnag = { group = "com.bugsnag", name = "bugsnag-android", version.ref = "bugsnag" }
+
+# UT
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+growingio-plugin = { id = "com.growingio.android.saas", version.ref = "growingioPlugin" }
+huawei-agcp = { id = "com.huawei.agconnect", version.ref = "huaweiAgcp" }
+honor-asplugin = { id = "com.hihonor.mcs.asplugin", version.ref = "honorPlugin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
