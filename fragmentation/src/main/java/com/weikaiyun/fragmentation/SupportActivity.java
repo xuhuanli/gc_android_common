@@ -1,5 +1,6 @@
 package com.weikaiyun.fragmentation;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MotionEvent;
 
@@ -97,9 +98,9 @@ abstract public class SupportActivity extends AppCompatActivity implements ISupp
     /**
      * 不建议复写该方法,请使用 {@link #onBackPressedSupport} 代替
      */
+    @SuppressLint("MissingSuperCall")
     @Override
     final public void onBackPressed() {
-        super.onBackPressed();
         mDelegate.onBackPressed();
     }
 
