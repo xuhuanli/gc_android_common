@@ -20,6 +20,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.view.ViewGroup;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
@@ -44,6 +45,8 @@ public class SwipeMenuItem {
     private int width = -2;
     private int height = -2;
     private int weight = 0;
+
+    private ViewGroup customView;
 
     public SwipeMenuItem(Context context) {
         mContext = context;
@@ -162,5 +165,14 @@ public class SwipeMenuItem {
 
     public int getWeight() {
         return weight;
+    }
+
+    public SwipeMenuItem setCustomView(ViewGroup customView) {
+        this.customView = customView;
+        return this;
+    }
+
+    public ViewGroup getCustomView() {
+        return customView;
     }
 }

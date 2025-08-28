@@ -37,3 +37,4 @@ maven地址 见[maven_publish.gradle](maven_publish.gradle)
 - 新增circleprogressbar 支持渐变指示器的圆形进度条
 - 新增wavesidebar 索引侧边栏
 - 新增MZBanner 仿魅族轮博
+- swiper_recyclerview 1.0.5 新增侧滑自定义样式

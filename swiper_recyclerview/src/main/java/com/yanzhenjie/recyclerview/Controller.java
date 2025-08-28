@@ -18,7 +18,7 @@ package com.yanzhenjie.recyclerview;
 /**
  * Created by Yan Zhenjie on 2016/7/27.
  */
-interface Controller {
+public interface Controller {
 
     /**
      * The menu is open?

@@ -22,7 +22,7 @@ gradle.ext {
             "mzbanner"                   : "1.0.2", // 仿魅族轮播图
             "pickerview"                 : "1.1.3", // 关联wheelview
             "sticky-headers-recyclerview": "1.0.1", // rv粘性头
-            "swiper_recyclerview"        : "1.0.4",
+            "swiper_recyclerview"        : "1.0.5",
             "recyclerview_divider"       : "1.0.1",
             "wavesidebar"                : "1.0.1",
             "wheelview"                  : "1.1.3",

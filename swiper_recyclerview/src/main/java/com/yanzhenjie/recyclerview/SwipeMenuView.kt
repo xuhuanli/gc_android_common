@@ -1,121 +1,113 @@
-/*
- * Copyright 2016 Yan Zhenjie
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.yanzhenjie.recyclerview;
+package com.yanzhenjie.recyclerview
 
-import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Typeface;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import java.util.List;
-
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.TextViewCompat;
-import androidx.recyclerview.widget.RecyclerView;
+import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Typeface
+import android.text.TextUtils
+import android.util.AttributeSet
+import android.util.TypedValue
+import android.view.Gravity
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.widget.TextViewCompat
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Created by Yan Zhenjie on 2016/7/26.
  */
-public class SwipeMenuView extends LinearLayout implements View.OnClickListener {
+class SwipeMenuView @JvmOverloads constructor(
+    context: Context?,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr), View.OnClickListener {
+    private var mViewHolder: RecyclerView.ViewHolder? = null
+    private var mItemClickListener: OnItemMenuClickListener? = null
 
-    private RecyclerView.ViewHolder mViewHolder;
-    private OnItemMenuClickListener mItemClickListener;
-
-    public SwipeMenuView(Context context) {
-        this(context, null);
+    init {
+        gravity = Gravity.CENTER_VERTICAL
     }
 
-    public SwipeMenuView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
+    fun createMenu(
+        viewHolder: RecyclerView.ViewHolder, swipeMenu: SwipeMenu, controller: Controller?,
+        direction: Int, itemClickListener: OnItemMenuClickListener?
+    ) {
+        removeAllViews()
 
-    public SwipeMenuView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        setGravity(Gravity.CENTER_VERTICAL);
-    }
+        this.mViewHolder = viewHolder
+        this.mItemClickListener = itemClickListener
 
-    public void createMenu(RecyclerView.ViewHolder viewHolder, SwipeMenu swipeMenu, Controller controller,
-        int direction, OnItemMenuClickListener itemClickListener) {
-        removeAllViews();
+        // 随便写了下 有别的需求不满足自己改这个库
+        val items = swipeMenu.menuItems
+        // 如果任何一个菜单项有 customView，则优先使用它
+        val customItem = items.firstOrNull { it.customView != null }
+        customItem?.customView?.let {
+            addView(it)
+            it.setOnClickListener(this)
+            val menuBridge = SwipeMenuBridge(controller, direction, 0)
+            it.tag = menuBridge
+            return
+        }
 
-        this.mViewHolder = viewHolder;
-        this.mItemClickListener = itemClickListener;
+        for (i in items.indices) {
+            val item = items[i]
 
-        List<SwipeMenuItem> items = swipeMenu.getMenuItems();
-        for (int i = 0; i < items.size(); i++) {
-            SwipeMenuItem item = items.get(i);
+            val params =
+                LayoutParams(item.width, item.height)
+            params.weight = item.weight.toFloat()
+            val parent = LinearLayout(context)
+            parent.setId(i)
+            parent.gravity = Gravity.CENTER
+            parent.orientation = VERTICAL
+            parent.setLayoutParams(params)
+            ViewCompat.setBackground(parent, item.background)
+            parent.setOnClickListener(this)
+            addView(parent)
 
-            LayoutParams params = new LayoutParams(item.getWidth(), item.getHeight());
-            params.weight = item.getWeight();
-            LinearLayout parent = new LinearLayout(getContext());
-            parent.setId(i);
-            parent.setGravity(Gravity.CENTER);
-            parent.setOrientation(VERTICAL);
-            parent.setLayoutParams(params);
-            ViewCompat.setBackground(parent, item.getBackground());
-            parent.setOnClickListener(this);
-            addView(parent);
+            val menuBridge = SwipeMenuBridge(controller, direction, i)
+            parent.tag = menuBridge
 
-            SwipeMenuBridge menuBridge = new SwipeMenuBridge(controller, direction, i);
-            parent.setTag(menuBridge);
-
-            if (item.getImage() != null) {
-                ImageView iv = createIcon(item);
-                parent.addView(iv);
+            if (item.image != null) {
+                val iv = createIcon(item)
+                parent.addView(iv)
             }
 
-            if (!TextUtils.isEmpty(item.getText())) {
-                TextView tv = createTitle(item);
-                parent.addView(tv);
+            if (!TextUtils.isEmpty(item.text)) {
+                val tv = createTitle(item)
+                parent.addView(tv)
             }
         }
     }
 
-    @Override
-    public void onClick(View v) {
+    override fun onClick(v: View) {
         if (mItemClickListener != null) {
-            mItemClickListener.onItemClick((SwipeMenuBridge)v.getTag(), mViewHolder.getAdapterPosition());
+            mItemClickListener!!.onItemClick(
+                v.tag as SwipeMenuBridge?,
+                mViewHolder!!.getAdapterPosition()
+            )
         }
     }
 
-    private ImageView createIcon(SwipeMenuItem item) {
-        ImageView imageView = new ImageView(getContext());
-        imageView.setImageDrawable(item.getImage());
-        return imageView;
+    private fun createIcon(item: SwipeMenuItem): ImageView {
+        val imageView = ImageView(context)
+        imageView.setImageDrawable(item.image)
+        return imageView
     }
 
-    private TextView createTitle(SwipeMenuItem item) {
-        TextView textView = new TextView(getContext());
-        textView.setText(item.getText());
-        textView.setGravity(Gravity.CENTER);
-        int textSize = item.getTextSize();
-        if (textSize > 0) textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
-        ColorStateList textColor = item.getTitleColor();
-        if (textColor != null) textView.setTextColor(textColor);
-        int textAppearance = item.getTextAppearance();
-        if (textAppearance != 0) TextViewCompat.setTextAppearance(textView, textAppearance);
-        Typeface typeface = item.getTextTypeface();
-        if (typeface != null) textView.setTypeface(typeface);
-        return textView;
+    private fun createTitle(item: SwipeMenuItem): TextView {
+        val textView = TextView(context)
+        textView.text = item.text
+        textView.setGravity(Gravity.CENTER)
+        val textSize = item.textSize
+        if (textSize > 0) textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize.toFloat())
+        val textColor: ColorStateList? = item.titleColor
+        if (textColor != null) textView.setTextColor(textColor)
+        val textAppearance = item.textAppearance
+        if (textAppearance != 0) TextViewCompat.setTextAppearance(textView, textAppearance)
+        val typeface: Typeface? = item.textTypeface
+        if (typeface != null) textView.setTypeface(typeface)
+        return textView
     }
 }
