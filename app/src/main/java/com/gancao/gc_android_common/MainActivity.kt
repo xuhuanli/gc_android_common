@@ -6,12 +6,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
-import cn.bingoogolapple.photopicker.activity.BGAPreviewActivity
+import cn.bingoogolapple.photopicker.activity.BGAPhotoPreviewActivity
 import cn.bingoogolapple.photopicker.widget.BGASortableNinePhotoLayout
 import com.bigkoo.pickerview.builder.TimePickerBuilder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.gancao.gc_android_common.ext.GlideEngine
+import com.gancao.gc_android_common.ext.externalImgPath
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
@@ -81,27 +83,14 @@ class MainActivity : AppCompatActivity(), BGASortableNinePhotoLayout.Delegate {
         model: String?,
         models: ArrayList<String>?
     ) {
-        var file=filesDir
-        var list= arrayListOf("你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字你好我是一条文字","222222")
-        startActivity(
-            BGAPreviewActivity.IntentBuilder(this)
-                .saveImgDir(file)
-                .previewMaskPhotos(models)
-                .previewBottomContent(list)
+        sortableNinePhotoLayout?.let {
+            val intent = BGAPhotoPreviewActivity.IntentBuilder(this)
+                .saveImgDir(externalImgPath(this@MainActivity))
                 .previewPhotos(models)
-                .currentPosition(0)
+                .currentPosition(position)
                 .build()
-        )
-//        sortableNinePhotoLayout?.let {
-//            val intent = BGAPhotoPickerPreviewActivity.IntentBuilder(this)
-//                .previewPhotos(models)
-//                .selectedPhotos(models)
-//                .maxChooseCount(it.maxItemCount)
-//                .currentPosition(position)
-//                .isFromTakePhoto(false)
-//                .build()
-//            startActivityForResult(intent, 100)
-//        }
+            startActivityForResult(intent, 100)
+        }
     }
 
     override fun onNinePhotoItemExchanged(
@@ -112,16 +101,17 @@ class MainActivity : AppCompatActivity(), BGASortableNinePhotoLayout.Delegate {
     ) {
     }
 
-    protected open fun initUpload(
+    private fun initUpload(
         photoLayout: BGASortableNinePhotoLayout,
     ) {
         mPhotoLayout = photoLayout
         mPhotoLayout?.setDelegate(this)
     }
 
-    protected open fun openGallery(maxCount: Int = 9, callback: ((List<File>) -> Unit)? = null) {
+    private fun openGallery(maxCount: Int = 9, callback: ((List<File>) -> Unit)? = null) {
         PictureSelector.create(this)
             .openGallery(SelectMimeType.ofImage())
+            .setImageEngine(GlideEngine.createGlideEngine())
             .setMaxSelectNum(maxCount)
             .forResult(object : OnResultCallbackListener<LocalMedia> {
                 override fun onResult(result: ArrayList<LocalMedia>?) {

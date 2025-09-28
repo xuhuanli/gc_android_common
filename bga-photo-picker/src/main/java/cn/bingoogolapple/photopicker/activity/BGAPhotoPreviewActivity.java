@@ -15,14 +15,22 @@
  */
 package cn.bingoogolapple.photopicker.activity;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.core.view.ViewPropertyAnimatorListenerAdapter;
+
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +39,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -232,34 +242,28 @@ public class BGAPhotoPreviewActivity extends BGAPPToolbarActivity implements Pho
     }
 
     private synchronized void savePic() {
-        if (mSavePhotoTask != null) {
-            return;
-        }
+        if (mSavePhotoTask != null) return;
 
         final String url = mPhotoPageAdapter.getItem(mContentHvp.getCurrentItem());
-        File file;
+        final String fileName = BGAPhotoPickerUtil.md5(url) + ".png";
+
+        // 如果是本地 file://
         if (url.startsWith("file")) {
-            file = new File(url.replace("file://", ""));
+            File file = new File(url.replace("file://", ""));
             if (file.exists()) {
-                BGAPhotoPickerUtil.showSafe(getString(R.string.bga_pp_save_img_success_folder, file.getParentFile().getAbsolutePath()));
+                BGAPhotoPickerUtil.showSafe(getString(
+                        R.string.bga_pp_save_img_success_folder,
+                        file.getParentFile().getAbsolutePath()));
                 return;
             }
         }
 
-        // 通过MD5加密url生成文件名，避免多次保存同一张图片
-        file = new File(mSavePhotoDir, BGAPhotoPickerUtil.md5(url) + ".png");
-        if (file.exists()) {
-            BGAPhotoPickerUtil.showSafe(getString(R.string.bga_pp_save_img_success_folder, mSavePhotoDir.getAbsolutePath()));
-            return;
-        }
-
-        mSavePhotoTask = new BGASavePhotoTask(this, this, file);
+        mSavePhotoTask = new BGASavePhotoTask(this, this, null);
         BGAImage.download(url, new BGAImageLoader.DownloadDelegate() {
             @Override
             public void onSuccess(String url, Bitmap bitmap) {
-                if (mSavePhotoTask != null) {
-                    mSavePhotoTask.setBitmapAndPerform(bitmap);
-                }
+                saveBitmapToGallery(bitmap, fileName);
+                mSavePhotoTask = null;
             }
 
             @Override
@@ -287,5 +291,47 @@ public class BGAPhotoPreviewActivity extends BGAPPToolbarActivity implements Pho
             mSavePhotoTask = null;
         }
         super.onDestroy();
+    }
+
+    /**
+     * 把 Bitmap 保存到系统相册（MediaStore + MediaScanner 双保险）
+     */
+    private void saveBitmapToGallery(Bitmap bitmap, String fileName) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+        String appName = getApplicationInfo().loadLabel(getPackageManager()).toString();
+        String relativePath = Environment.DIRECTORY_PICTURES + "/" + appName;
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, relativePath);
+
+        ContentResolver resolver = getContentResolver();
+        Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        if (uri != null) {
+            try (OutputStream out = resolver.openOutputStream(uri)) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+
+                // Android 10+ 会自动出现在相册；Android 9- 再手动通知一下
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    String absolutePath = Environment.getExternalStoragePublicDirectory(relativePath)
+                            + "/" + fileName;
+                    MediaScannerConnection.scanFile(
+                            this,
+                            new String[]{absolutePath},
+                            new String[]{"image/png"},
+                            null
+                    );
+                }
+
+                BGAPhotoPickerUtil.showSafe(getString(
+                        R.string.bga_pp_save_img_success_folder,
+                        Environment.getExternalStoragePublicDirectory(relativePath).getAbsolutePath()));
+            } catch (IOException e) {
+                e.printStackTrace();
+                BGAPhotoPickerUtil.show(R.string.bga_pp_save_img_failure);
+            }
+        } else {
+            BGAPhotoPickerUtil.show(R.string.bga_pp_save_img_failure);
+        }
     }
 }
