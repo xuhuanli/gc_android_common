@@ -26,6 +26,7 @@ gradle.ext {
             "recyclerview_divider"       : "1.0.1",
             "wavesidebar"                : "1.0.1",
             "wheelview"                  : "1.1.3",
+            "hptwebsocket"               : "1.0.0", // websocket
     ]
 }
 
