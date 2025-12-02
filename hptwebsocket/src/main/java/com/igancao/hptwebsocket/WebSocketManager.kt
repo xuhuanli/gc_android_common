@@ -14,6 +14,7 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -41,8 +42,8 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
 
     private var jobScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    // 队列保存连接建立前发送的消息
-    private val messageQueue = LinkedBlockingQueue<WsMessage>(200)
+    // 队列保存连接建立前发送的消息，双端队列，需要把失败的消息放到首位，一直发送它直到成功
+    private val messageQueue = LinkedBlockingDeque<WsMessage>(200)
 
     // 服务器的回复队列
     private val responseQueue = LinkedBlockingQueue<WsMessage>(200)
@@ -127,24 +128,38 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
         flushQueue()
     }
 
+    // 是否有协程正在发送队列
+    private val isFlushing = AtomicBoolean(false)
+
     private fun flushQueue() {
         if (!isConnected.get()) return
-        while (true) {
-            val next = messageQueue.poll() ?: break
-            when (next) {
-                is WsMessage.Text -> {
-                    webSocket?.let { ws ->
-                        wsListener?.onSendText(ws, next.text)
-                        ws.send(next.text)
-                    }
-                }
+        // 如果已有协程在发送，直接返回
+        if (!isFlushing.compareAndSet(false, true)) return
 
-                is WsMessage.Binary -> {
-                    webSocket?.let { ws ->
-                        wsListener?.onSendBinary(ws, next.bytes)
-                        ws.send(ByteString.of(*next.bytes))
+        jobScope.launch {
+            try {
+                while (isConnected.get()) {
+                    val next = messageQueue.poll() ?: break
+
+                    delay(config?.sendInterval ?: 200) // 控制发送速率
+
+                    val success = when (next) {
+                        is WsMessage.Text -> webSocket?.send(next.text) ?: false
+                        is WsMessage.Binary -> webSocket?.send(ByteString.of(*next.bytes)) ?: false
+                    }
+
+                    if (!success) {
+                        Log.e(TAG, "发送失败，重新入队到队首")
+                        messageQueue.offerFirst(next) // 放回队首
+                        break // 停止当前 flush，等待下次 flush
+                    } else {
+                        // 回调
+                        if (next is WsMessage.Text) wsListener?.onSendText(webSocket!!, next.text)
+                        else if (next is WsMessage.Binary) wsListener?.onSendBinary(webSocket!!, next.bytes)
                     }
                 }
+            } finally {
+                isFlushing.set(false)
             }
         }
     }
@@ -189,7 +204,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         isConnected.set(false)
         wsListener?.onFailure(t)
-        Log.e(TAG, "===> 连接失败: : ${t.message}")
+        Log.e(TAG, "===> 连接失败: ", t)
 
         attemptReconnect()
     }

@@ -83,4 +83,4 @@ maven(url = "http://nexus.igancao.com/repository/3rd_party/") {
 ```
 
 - 添加依赖
-  `implementation("com.gancao:hptwebsocket:1.0.1")`
+  `implementation("com.gancao:hptwebsocket:1.0.2")`
