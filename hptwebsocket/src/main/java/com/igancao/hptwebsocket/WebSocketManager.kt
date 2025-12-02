@@ -3,12 +3,9 @@ package com.igancao.hptwebsocket
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -17,7 +14,6 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -46,15 +42,10 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     private var jobScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // 队列保存连接建立前发送的消息
-    private val messageQueue = ConcurrentLinkedQueue<WsMessage>()
-
-    private val _messagesFlow = MutableSharedFlow<WsMessage>(extraBufferCapacity = 100)
-
-    // 接收的消息会通过这个Flow发送出去
-    val messagesFlow: SharedFlow<WsMessage> = _messagesFlow
+    private val messageQueue = LinkedBlockingQueue<WsMessage>(200)
 
     // 服务器的回复队列
-    private val responseQueue = LinkedBlockingQueue<ByteArray>()
+    private val responseQueue = LinkedBlockingQueue<WsMessage>(200)
 
     companion object {
         const val MANUAL_CLOSE_CODE = 1000
@@ -75,7 +66,15 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
             while (isActive) {
                 val msg = responseQueue.poll(100, TimeUnit.MILLISECONDS)
                 msg?.let {
+                    when (msg) {
+                        is WsMessage.Text -> {
+                            wsListener?.onTextMessage(msg.text)
+                        }
 
+                        is WsMessage.Binary -> {
+                            wsListener?.onBinaryMessage(msg.bytes)
+                        }
+                    }
                 }
             }
         }
@@ -93,7 +92,8 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
 
         val request = builder.build()
 
-        webSocket = okHttpClient.newWebSocket(request, this)
+        webSocket = okHttpClient
+            .newWebSocket(request, this)
         Log.d(TAG, "WebSocket 连接 --> ${cfg.url}")
     }
 
@@ -117,25 +117,33 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
      * [0x01, 0x02, 0x03, 0x04]
      */
     fun send(msg: WsMessage) {
-        if (!isConnected.get()) {
-            Log.d(TAG, "WebSocket 未连接, 消息: $msg 将消息入队列，连接成功后会自动发送")
-            messageQueue.add(msg)
+        // 1. 先入队
+        val success = messageQueue.offer(msg)
+        if (!success) {
+            handleSendQueueOverflow(msg)
             return
         }
-        when (msg) {
-            is WsMessage.Text -> {
-                webSocket?.let { ws ->
-                    wsListener?.onSendText(ws, msg.text)
-                    val sent = webSocket?.send(msg.text) ?: false
-                    Log.d(TAG, "Sent text message: ${msg.text}, success=$sent")
-                }
-            }
+        // 2. 如果已连接，启动队列发送
+        flushQueue()
+    }
 
-            is WsMessage.Binary -> {
-                webSocket?.let { ws ->
-                    wsListener?.onSendBinary(ws, msg.bytes)
-                    val sent = webSocket?.send(ByteString.of(*msg.bytes)) ?: false
-                    Log.d(TAG, "Sent binary message of size ${msg.bytes.size}, success=$sent")
+    private fun flushQueue() {
+        if (!isConnected.get()) return
+        while (true) {
+            val next = messageQueue.poll() ?: break
+            when (next) {
+                is WsMessage.Text -> {
+                    webSocket?.let { ws ->
+                        wsListener?.onSendText(ws, next.text)
+                        ws.send(next.text)
+                    }
+                }
+
+                is WsMessage.Binary -> {
+                    webSocket?.let { ws ->
+                        wsListener?.onSendBinary(ws, next.bytes)
+                        ws.send(ByteString.of(*next.bytes))
+                    }
                 }
             }
         }
@@ -144,32 +152,34 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     /** ------------------ WebSocket 回调 ------------------ */
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
+        Log.d(TAG, "WebSocket 连接成功")
         isConnected.set(true)
         reconnectAttempts = 0
         wsListener?.onOpen()
-        Log.d(TAG, "WebSocket 连接成功")
 
-        // 重连成功后把队列里的消息重新发送出去
-        while (true) {
-            val msg = messageQueue.poll() ?: break
-            send(msg)
-        }
-
-        startHeartbeat()
+        // 所有连接前入队的消息都按顺序发送
+        flushQueue()
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         Log.d(TAG, "===> 收到文本消息: $text")
-        wsListener?.onTextMessage(text)
-        resetHeartbeatTimeout()
+        val msg = WsMessage.Text(text)
+        val success = responseQueue.offer(msg)
+        if (!success) {
+            handleReceiveQueueOverflow(msg)
+            return
+        }
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
         Log.d(TAG, "===> 收到ByteArray消息 size: ${bytes.size}")
         val data = bytes.toByteArray()
-        responseQueue.offer(data)
-        wsListener?.onBinaryMessage(data)
-        resetHeartbeatTimeout()
+        val msg = WsMessage.Binary(data)
+        val success = responseQueue.offer(msg)
+        if (!success) {
+            handleReceiveQueueOverflow(msg)
+            return
+        }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -214,65 +224,17 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
         }
     }
 
-    /** ------------------ 心跳保持连接 ------------------ */
-
-    private var heartbeatJob: Job? = null
-    private var heartbeatTimeoutJob: Job? = null
-
-    private fun startHeartbeat() {
-        val cfg = config ?: return
-
-        heartbeatJob?.cancel()
-        heartbeatTimeoutJob?.cancel()
-
-        heartbeatJob = jobScope.launch {
-            while (isActive && isConnected.get()) {
-                try {
-                    webSocket?.send("""{"type": "ping"}""") // 发一个{"type": "ping"}来保持连接
-                    Log.d(TAG, "Sent heartbeat ping")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error sending heartbeat ping $e")
-                }
-                delay(cfg.pingInterval)
-            }
-        }
-        // 发送心跳包后启动心跳超时监听
-        startHeartbeatTimeout(cfg.pingTimeout)
+    private fun handleSendQueueOverflow(msg: WsMessage) {
+        wsListener?.onSendQueueOverFlow(msg)
     }
 
-    private fun startHeartbeatTimeout(timeoutMillis: Long) {
-        heartbeatTimeoutJob?.cancel()
-        heartbeatTimeoutJob = jobScope.launch {
-            while (isActive && isConnected.get()) {
-                delay(timeoutMillis)
-                Log.w(TAG, "Heartbeat timeout detected, closing socket and reconnecting")
-                webSocket?.cancel()
-                isConnected.set(false)
-                attemptReconnect()
-                break
-            }
-        }
+    private fun handleReceiveQueueOverflow(msg: WsMessage) {
+        wsListener?.onReceiveQueueOverFlow(msg)
     }
-
-    private fun resetHeartbeatTimeout() {
-        val cfg = config ?: return
-        heartbeatTimeoutJob?.cancel()
-        heartbeatTimeoutJob = jobScope.launch {
-            delay(cfg.pingTimeout)
-            Log.w(TAG, "Heartbeat timeout detected after reset, closing socket and reconnecting")
-            webSocket?.cancel()
-            isConnected.set(false)
-            attemptReconnect()
-        }
-    }
-
 
     /** ------------------ 手动停止此WebSocket连接 ------------------ */
-
     fun stopManual() {
         jobScope.cancel()
-        heartbeatJob?.cancel()
-        heartbeatTimeoutJob?.cancel()
         disconnect()
     }
 }

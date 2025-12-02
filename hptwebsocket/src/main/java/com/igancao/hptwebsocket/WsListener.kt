@@ -36,8 +36,6 @@ interface WsListener {
     fun onBinaryMessage(bytes: ByteArray) {
     }
 
-    fun parse(res: ByteArray)
-
     /**
      * 服务器即将关闭连接
      */
@@ -62,4 +60,14 @@ interface WsListener {
      */
     fun onOpen() {
     }
+
+    /**
+     * 发送消息队列溢出
+     */
+    fun onSendQueueOverFlow(msg: WsMessage) {}
+
+    /**
+     * 接收消息队列溢出
+     */
+    fun onReceiveQueueOverFlow(msg: WsMessage) {}
 }
