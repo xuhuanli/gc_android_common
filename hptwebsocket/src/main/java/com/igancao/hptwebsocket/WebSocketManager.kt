@@ -4,7 +4,6 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -103,9 +102,16 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
      */
     fun disconnect() {
         reconnectAttempts = 0
-        isConnected.set(false)
+        // 1. 停止 WebSocket，不触发重连
         webSocket?.close(MANUAL_CLOSE_CODE, "WebSocket 手动断开连接")
-        Log.d(TAG, "WebSocket 手动断开连接")
+        // 4. 停止当前的 flush 协程循环
+        isFlushing.set(false)
+        // 5. 重置连接状态
+        isConnected.set(false)
+        // 清空队列
+        messageQueue.clear()
+        responseQueue.clear()
+        Log.d(TAG, "手动停止 WebSocket，不再重连，仅清空队列")
     }
 
     /**
@@ -118,20 +124,28 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
      * [0x01, 0x02, 0x03, 0x04]
      */
     fun send(msg: WsMessage) {
-        // 1. 先入队
-        val success = messageQueue.offer(msg)
-        if (!success) {
-            handleSendQueueOverflow(msg)
-            return
+        jobScope.launch(Dispatchers.Main) {
+            // 1. 尝试入队
+            val success = messageQueue.offer(msg)
+            if (!success) {
+                handleSendQueueOverflow(msg)
+                // 不调用 flushQueue，也不继续
+            } else {
+                // 2. 延迟，避免消息入队一下子太多导致超过最大值被丢弃。默认入队间隔是发送间隔的1/2
+                delay((config?.sendInterval ?: 200) / 2)
+                // 3. 如果已连接，启动队列发送
+                if (isConnected.get()) {
+                    flushQueue()
+                }
+            }
         }
-        // 2. 如果已连接，启动队列发送
-        flushQueue()
     }
 
     // 是否有协程正在发送队列
     private val isFlushing = AtomicBoolean(false)
 
     private fun flushQueue() {
+        Log.i(TAG, "flushQueue: isConnected: ${isConnected.get()}, isFlushing: ${isFlushing.get()}")
         if (!isConnected.get()) return
         // 如果已有协程在发送，直接返回
         if (!isFlushing.compareAndSet(false, true)) return
@@ -149,15 +163,23 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
                     }
 
                     if (!success) {
-                        Log.e(TAG, "发送失败，重新入队到队首")
-                        messageQueue.offerFirst(next) // 放回队首
+                        // 只在写数据时遇到发送失败会回队列，如果是手动关闭的连接，为保证队列清空，这个延迟发送的msg不会归队
+                        if (isFlushing.get()) {
+                            Log.e(TAG, "发送失败，重新入队到队首")
+                            messageQueue.offerFirst(next) // 放回队首
+                        }
                         break // 停止当前 flush，等待下次 flush
                     } else {
                         // 回调
                         if (next is WsMessage.Text) wsListener?.onSendText(webSocket!!, next.text)
-                        else if (next is WsMessage.Binary) wsListener?.onSendBinary(webSocket!!, next.bytes)
+                        else if (next is WsMessage.Binary) wsListener?.onSendBinary(
+                            webSocket!!,
+                            next.bytes
+                        )
                     }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "flushQueue: error $e")
             } finally {
                 isFlushing.set(false)
             }
@@ -187,7 +209,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        Log.d(TAG, "===> 收到ByteArray消息 size: ${bytes.size}")
+        Log.d(TAG, "===> 收到ByteArray消息 size: ${bytes}")
         val data = bytes.toByteArray()
         val msg = WsMessage.Binary(data)
         val success = responseQueue.offer(msg)
@@ -245,11 +267,5 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
 
     private fun handleReceiveQueueOverflow(msg: WsMessage) {
         wsListener?.onReceiveQueueOverFlow(msg)
-    }
-
-    /** ------------------ 手动停止此WebSocket连接 ------------------ */
-    fun stopManual() {
-        jobScope.cancel()
-        disconnect()
     }
 }
