@@ -46,6 +46,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
 
     // 服务器的回复队列
     private val responseQueue = LinkedBlockingQueue<WsMessage>(200)
+    var enableLog: Boolean = true
 
     companion object {
         const val MANUAL_CLOSE_CODE = 1000
@@ -57,6 +58,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     fun init(config: WsConfig, listener: WsListener) {
         this.config = config
         this.wsListener = listener
+        enableLog = this.config?.enableLog?: true
         connect()
         parseLoop()
     }
@@ -94,7 +96,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
 
         webSocket = okHttpClient
             .newWebSocket(request, this)
-        Log.d(TAG, "WebSocket 连接 --> ${cfg.url}")
+        if (enableLog) Log.d(TAG, "WebSocket 连接 --> ${cfg.url}")
     }
 
     /**
@@ -111,7 +113,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
         // 清空队列
         messageQueue.clear()
         responseQueue.clear()
-        Log.d(TAG, "手动停止 WebSocket，不再重连，仅清空队列")
+        if (enableLog) Log.d(TAG, "手动停止 WebSocket，不再重连，仅清空队列")
     }
 
     /**
@@ -145,7 +147,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     private val isFlushing = AtomicBoolean(false)
 
     private fun flushQueue() {
-        Log.i(TAG, "flushQueue: isConnected: ${isConnected.get()}, isFlushing: ${isFlushing.get()}")
+        if (enableLog) Log.i(TAG, "flushQueue: isConnected: ${isConnected.get()}, isFlushing: ${isFlushing.get()}")
         if (!isConnected.get()) return
         // 如果已有协程在发送，直接返回
         if (!isFlushing.compareAndSet(false, true)) return
@@ -179,7 +181,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "flushQueue: error $e")
+                if (enableLog) Log.e(TAG, "flushQueue: error $e")
             } finally {
                 isFlushing.set(false)
             }
@@ -189,7 +191,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     /** ------------------ WebSocket 回调 ------------------ */
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d(TAG, "WebSocket 连接成功")
+        if (enableLog) Log.d(TAG, "WebSocket 连接成功")
         isConnected.set(true)
         reconnectAttempts = 0
         wsListener?.onOpen()
@@ -199,7 +201,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
-        Log.d(TAG, "===> 收到文本消息: $text")
+        if (enableLog) Log.d(TAG, "===> 收到文本消息: $text")
         val msg = WsMessage.Text(text)
         val success = responseQueue.offer(msg)
         if (!success) {
@@ -209,7 +211,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        Log.d(TAG, "===> 收到ByteArray消息 size: ${bytes}")
+        if (enableLog) Log.d(TAG, "===> 收到ByteArray消息 size: ${bytes}")
         val data = bytes.toByteArray()
         val msg = WsMessage.Binary(data)
         val success = responseQueue.offer(msg)
@@ -226,15 +228,14 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         isConnected.set(false)
         wsListener?.onFailure(t)
-        Log.e(TAG, "===> 连接失败: ", t)
-
+        if (enableLog) Log.e(TAG, "===> 连接失败: ", t)
         attemptReconnect()
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         isConnected.set(false)
         wsListener?.onClosed(code, reason)
-        Log.d(TAG, "===> 连接已关闭: code=$code, reason=$reason")
+        if (enableLog) Log.d(TAG, "===> 连接已关闭: code=$code, reason=$reason")
         if (code != MANUAL_CLOSE_CODE) {
             attemptReconnect()
         }
@@ -255,7 +256,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
         delayMillis = min(delayMillis, cfg.reconnectMaxDelay)
 
         jobScope.launch {
-            Log.d(TAG, "等待${delayMillis}ms，第${reconnectAttempts}次尝试重连")
+            if (enableLog) Log.d(TAG, "等待${delayMillis}ms，第${reconnectAttempts}次尝试重连")
             delay(delayMillis)
             connect()
         }

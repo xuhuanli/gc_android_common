@@ -12,4 +12,5 @@ data class WsConfig(
     val reconnectBaseDelay: Long = 1000,  // 初次重连延迟
     val reconnectMaxDelay: Long = 60_000, // 最大重连延迟
     val sendInterval: Long = 200, // 每段消息的发送间隔，默认200ms
+    val enableLog: Boolean = true, // 是否打印日志
 )
