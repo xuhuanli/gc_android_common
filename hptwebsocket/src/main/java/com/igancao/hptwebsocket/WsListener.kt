@@ -14,7 +14,9 @@ interface WsListener {
      * @param builder 请求构建器
      * @param config 配置
      */
-    fun buildHeaders(builder: Request.Builder, config: WsConfig) {}
+    fun buildHeaders(builder: Request.Builder, config: WsConfig) {
+        builder.url(config.url)
+    }
 
     // 发送文本之前的回调
     fun onSendText(webSocket: WebSocket, text: String) {}
