@@ -35,6 +35,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
-    implementation(libs.coroutines)
-    implementation(libs.okhttp3)
+    api(libs.coroutines)
+    api(libs.okhttp3)
 }
