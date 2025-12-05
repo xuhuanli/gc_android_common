@@ -7,6 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -26,7 +27,8 @@ import kotlin.math.min
  * okHttpClient使用NormalOkHttpClient 里面的配置都是ci的参数
  */
 
-class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListener() {
+class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultClient()) :
+    WebSocketListener() {
 
     private val TAG = "WebSocketManager"
 
@@ -50,6 +52,19 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
 
     companion object {
         const val MANUAL_CLOSE_CODE = 1000
+
+        /**
+         * 创建一个默认的okhttpClient
+         */
+        private fun createDefaultClient(): OkHttpClient {
+            return OkHttpClient.Builder()
+                .retryOnConnectionFailure(true)
+                .pingInterval(5, TimeUnit.SECONDS) // 5s一个ping包
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(0, TimeUnit.MILLISECONDS) // 无限大读取时间
+                .connectionPool(ConnectionPool(5, 5, TimeUnit.MINUTES))
+                .build()
+        }
     }
 
 
@@ -58,11 +73,16 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     fun init(config: WsConfig, listener: WsListener) {
         this.config = config
         this.wsListener = listener
-        enableLog = this.config?.enableLog?: true
+        enableLog = this.config?.enableLog ?: true
         connect()
         parseLoop()
     }
 
+    fun getOkHttpClient() = okHttpClient
+
+    /**
+     * 无限循环解析回复的消息队列
+     */
     private fun parseLoop() {
         jobScope.launch {
             while (isActive) {
@@ -82,6 +102,9 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
         }
     }
 
+    /**
+     * 发起连接
+     */
     fun connect() {
         val cfg = config ?: return
 
@@ -101,6 +124,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
 
     /**
      * 手动关闭连接
+     * 只有此方法进行关闭连接才不会触发重连，其它情况断开连接都会自动尝试重连
      */
     fun disconnect() {
         reconnectAttempts = 0
@@ -147,11 +171,10 @@ class WebSocketManager(private val okHttpClient: OkHttpClient) : WebSocketListen
     private val isFlushing = AtomicBoolean(false)
 
     private fun flushQueue() {
-        if (enableLog) Log.i(TAG, "flushQueue: isConnected: ${isConnected.get()}, isFlushing: ${isFlushing.get()}")
         if (!isConnected.get()) return
         // 如果已有协程在发送，直接返回
         if (!isFlushing.compareAndSet(false, true)) return
-
+        if (enableLog) Log.i(TAG, "flushQueue: 重启发送协程")
         jobScope.launch {
             try {
                 while (isConnected.get()) {
