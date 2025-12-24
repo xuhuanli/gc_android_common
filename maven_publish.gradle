@@ -2,12 +2,16 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 
+def props = new Properties()
+props.load(new FileInputStream(new File(rootProject.rootDir, "local.properties")))
+
 gradle.ext {
+    println("chiyangzi" +"groupId=" + props.getProperty("gc_maven_group", "") + "userName=" + props.getProperty("gc_maven_user", "") + "password=" + props.getProperty("gc_maven_password", "") + "repoUrl=" + props.getProperty("gc_maven_url", ""))
     maven_config = [
-            "repoUrl" : "http://nexus.igancao.com/repository/3rd_party/",
+            "repoUrl" : props.getProperty("gc_maven_url", ""),
             "groupId" : "com.gancao",
-            "userName": "developer",
-            "password": "72fb25481e"
+            "userName": props.getProperty("gc_maven_user", ""),
+            "password": props.getProperty("gc_maven_password", "")
     ]
 
     tools_version = [
