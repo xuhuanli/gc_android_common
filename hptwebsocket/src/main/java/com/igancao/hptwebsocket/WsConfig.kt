@@ -8,9 +8,9 @@ package com.igancao.hptwebsocket
  */
 
 data class WsConfig(
-    val url: String,
+    val url: String = "ws://asr-test.igancao.com/ws", // 推流地址
     val reconnectBaseDelay: Long = 1000,  // 初次重连延迟
     val reconnectMaxDelay: Long = 60_000, // 最大重连延迟
-    val sendInterval: Long = 200, // 每段消息的发送间隔，默认200ms
+    val sendInterval: Long = 0L, // 每段消息的发送间隔，默认0ms
     val enableLog: Boolean = true, // 是否打印日志
 )

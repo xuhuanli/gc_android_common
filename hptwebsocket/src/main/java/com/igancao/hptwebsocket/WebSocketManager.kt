@@ -158,7 +158,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
                 // 不调用 flushQueue，也不继续
             } else {
                 // 2. 延迟，避免消息入队一下子太多导致超过最大值被丢弃。默认入队间隔是发送间隔的1/2
-                delay((config?.sendInterval ?: 200) / 2)
+                delay(config?.sendInterval ?: 0)
                 // 3. 如果已连接，启动队列发送
                 if (isConnected.get()) {
                     flushQueue()
@@ -180,7 +180,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
                 while (isConnected.get()) {
                     val next = messageQueue.poll() ?: break
 
-                    delay(config?.sendInterval ?: 200) // 控制发送速率
+                    delay(config?.sendInterval ?: 0) // 控制发送速率
 
                     val success = when (next) {
                         is WsMessage.Text -> webSocket?.send(next.text) ?: false
