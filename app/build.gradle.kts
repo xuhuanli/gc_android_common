@@ -54,6 +54,7 @@ dependencies {
     implementation(project(":bga-base-adapter"))
     implementation(project(":bga-photo-picker"))
     implementation(project(":mzbanner"))
+    implementation(project(":hpt_jsbridge"))
     implementation(project(":sticky-headers-recyclerview"))
     implementation("io.github.lucksiege:pictureselector:v3.11.2")
     api(libs.glide)
