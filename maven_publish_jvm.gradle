@@ -1,0 +1,57 @@
+apply plugin: 'maven-publish'
+
+def props = new Properties()
+def localPropsFile = new File(rootProject.rootDir, "local.properties")
+if (localPropsFile.exists()) {
+    props.load(new FileInputStream(localPropsFile))
+}
+
+gradle.ext {
+    println("chiyangzi-jvm " + "groupId=" + props.getProperty("gc_maven_group", "") +
+            " userName=" + props.getProperty("gc_maven_user", "") +
+            " password=" + props.getProperty("gc_maven_password", "") +
+            " repoUrl=" + props.getProperty("gc_maven_url", ""))
+
+    maven_config_jvm = [
+            "repoUrl" : props.getProperty("gc_maven_url", ""),
+            "groupId" : "com.gancao",
+            "userName": props.getProperty("gc_maven_user", ""),
+            "password": props.getProperty("gc_maven_password", "")
+    ]
+
+    tools_version_jvm = [
+            "hpt_jsbridge_processor": "1.0.2", // jsbridge注解处理器
+    ]
+}
+
+tasks.register("sourcesJar", Jar) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.allSource)
+}
+
+afterEvaluate { project ->
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.java
+                artifact tasks.named("sourcesJar")
+                groupId = gradle.ext.maven_config_jvm.groupId
+                artifactId = project.name
+                version = gradle.ext.tools_version_jvm[artifactId]
+                println("chiyangzi-jvm " + "from=" + components.findByName("java") +
+                        " groupId=" + groupId + " artifactId=" + artifactId + " version=" + version)
+            }
+        }
+        repositories {
+            maven {
+                url gradle.ext.maven_config_jvm.repoUrl
+                credentials {
+                    username = gradle.ext.maven_config_jvm.userName
+                    password = gradle.ext.maven_config_jvm.password
+                }
+                allowInsecureProtocol = true
+            }
+        }
+    }
+}
+
