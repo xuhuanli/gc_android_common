@@ -226,14 +226,14 @@ open class AndroidBaseBridge(
             logJsInfo(
                 method = methodName,
                 param = bridgeRequest,
-                throwable = Throwable("传参错误: JSON格式不正确 for method '$methodName'. Error: ${e.message}")
+                throwable = Throwable("发生错误: 类型为 ${e::class.java.simpleName} for method '$methodName'. Error: ${e.message}")
             )
             // 尝试从原始JSON中提取traceId，以便给前端一个失败的交代
             val traceId = extractTraceIdFromJson(bridgeRequest)
             invokeOnBridgeSysAck(
                 traceId,
                 -2,
-                "传参错误: JSON格式不正确 for method '$methodName'. Error: ${e.message}"
+                "发生错误: 类型为 ${e::class.java.simpleName} for method '$methodName'. Error: ${e.message}"
             )
         }
     }

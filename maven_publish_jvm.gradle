@@ -20,7 +20,7 @@ gradle.ext {
     ]
 
     tools_version_jvm = [
-            "hpt_jsbridge_processor": "1.0.2", // jsbridge注解处理器
+            "hpt_jsbridge_processor": "1.0.3", // jsbridge注解处理器
     ]
 }
 
