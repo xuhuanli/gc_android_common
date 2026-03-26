@@ -133,9 +133,8 @@ permissionsdispatcher-processor = { group = "com.github.permissions-dispatcher",
 # network retrofit bom
 retrofit-bom = { group = "com.squareup.retrofit2", name = "retrofit-bom", version.ref = "retrofit" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit" }
-# gson-converter用自己的
-# retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson" }
 retrofit-converter-scalars = { group = "com.squareup.retrofit2", name = "converter-scalars" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson" }
 okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp",version.ref = "okhttp3" }
 logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "loggingInterceptor" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
