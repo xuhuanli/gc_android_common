@@ -38,7 +38,11 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
     // 语音识别平台
     private var wsListener: WsListener? = null
 
+    // ws是否建立连接
     private val isConnected = AtomicBoolean(false)
+
+    // 是否有协程正在发送队列
+    private val isFlushing = AtomicBoolean(false)
     private var reconnectAttempts = 0
 
     private var jobScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -150,25 +154,16 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
      * [0x01, 0x02, 0x03, 0x04]
      */
     fun send(msg: WsMessage) {
-        jobScope.launch(Dispatchers.Main) {
-            // 1. 尝试入队
-            val success = messageQueue.offer(msg)
-            if (!success) {
-                handleSendQueueOverflow(msg)
-                // 不调用 flushQueue，也不继续
-            } else {
-                // 2. 延迟，避免消息入队一下子太多导致超过最大值被丢弃。默认入队间隔是发送间隔的1/2
-                delay(config?.sendInterval ?: 0)
-                // 3. 如果已连接，启动队列发送
-                if (isConnected.get()) {
-                    flushQueue()
-                }
+        // 直接入队
+        val success = messageQueue.offer(msg)
+        if (!success) {
+            handleSendQueueOverflow(msg)
+        } else {
+            if (isConnected.get()) {
+                flushQueue()
             }
         }
     }
-
-    // 是否有协程正在发送队列
-    private val isFlushing = AtomicBoolean(false)
 
     private fun flushQueue() {
         if (!isConnected.get()) return
@@ -177,10 +172,13 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
         if (enableLog) Log.i(TAG, "flushQueue: 重启发送协程")
         jobScope.launch {
             try {
-                while (isConnected.get()) {
-                    val next = messageQueue.poll() ?: break
-
-                    delay(config?.sendInterval ?: 0) // 控制发送速率
+                while (isConnected.get() && isActive) {
+                    val next = messageQueue.poll()
+                    // 没有消息 延迟等待一段时间 然后继续循环
+                    if (next == null) {
+                        delay(100)
+                        continue
+                    }
 
                     val success = when (next) {
                         is WsMessage.Text -> webSocket?.send(next.text) ?: false
@@ -190,7 +188,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
                     if (!success) {
                         // 只在写数据时遇到发送失败会回队列，如果是手动关闭的连接，为保证队列清空，这个延迟发送的msg不会归队
                         if (isFlushing.get()) {
-                            Log.e(TAG, "发送失败，重新入队到队首")
+                            if (enableLog) Log.e(TAG, "发送失败，重新入队到队首")
                             messageQueue.offerFirst(next) // 放回队首
                         }
                         break // 停止当前 flush，等待下次 flush
@@ -207,6 +205,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
                 if (enableLog) Log.e(TAG, "flushQueue: error $e")
             } finally {
                 isFlushing.set(false)
+                if (enableLog) Log.d(TAG, "flushQueue: 停止发送协程")
             }
         }
     }
@@ -250,6 +249,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         isConnected.set(false)
+        isFlushing.set(false)
         wsListener?.onFailure(t)
         if (enableLog) Log.e(TAG, "===> 连接失败: ", t)
         attemptReconnect()
@@ -257,6 +257,7 @@ class WebSocketManager(private val okHttpClient: OkHttpClient = createDefaultCli
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         isConnected.set(false)
+        isFlushing.set(false)
         wsListener?.onClosed(code, reason)
         if (enableLog) Log.d(TAG, "===> 连接已关闭: code=$code, reason=$reason")
         if (code != MANUAL_CLOSE_CODE) {
