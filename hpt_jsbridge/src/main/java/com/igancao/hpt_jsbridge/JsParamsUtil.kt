@@ -102,3 +102,25 @@ fun Map<String, Any>.optDouble(key: String, defaultValue: Double = 0.0): Double 
         else -> defaultValue
     }
 }
+
+inline fun <reified T> Map<String, Any>.optList(
+    key: String,
+    defaultValue: List<T> = emptyList()
+): List<T> {
+    val value = this[key] ?: return defaultValue
+    val listType = object : TypeToken<List<T>>() {}.type
+    return runCatching {
+        when (value) {
+            is List<*> -> JsParamsUtil.fromJson<List<T>>(JsParamsUtil.toJson(value), listType)
+            is String -> {
+                if (value.isBlank()) {
+                    defaultValue
+                } else {
+                    JsParamsUtil.fromJson<List<T>>(value, listType)
+                }
+            }
+            else -> defaultValue
+        }
+    }.getOrDefault(defaultValue)
+}
+
