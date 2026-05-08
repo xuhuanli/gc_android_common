@@ -151,6 +151,7 @@ open class AndroidBaseBridge(
                     )
                     syncResult = JsParamsUtil.toJson(response)
                 }
+
                 BridgeHandleResult.NotHandled -> {
                     logJsInfo(
                         method = methodName,
@@ -182,7 +183,8 @@ open class AndroidBaseBridge(
         payloadMap: Map<String, Any>
     ): BridgeHandleResult {
         for (handler in handlers) {
-            when (val result = handler.handleAction(methodName, traceId, requestStr, payloadMap, this)) {
+            when (val result =
+                handler.handleAction(methodName, traceId, requestStr, payloadMap, this)) {
                 is BridgeHandleResult.Handled -> return result
                 BridgeHandleResult.NotHandled -> Unit
             }
@@ -292,12 +294,20 @@ open class AndroidBaseBridge(
     ) {
         if (enableLog) {
             val thread = Thread.currentThread()
-            Log.i(
-                BRIDGE_LOG_TAG,
-                "method=$method thread_name=${thread.name}" +
-                        "\nparam: $param" +
-                        "\nthrow:$throwable"
-            )
+            if (throwable == null) {
+                Log.i(
+                    BRIDGE_LOG_TAG,
+                    "method=$method thread_name=${thread.name}" +
+                            "\nparam: $param"
+                )
+            } else {
+                Log.e(
+                    BRIDGE_LOG_TAG,
+                    "method=$method thread_name=${thread.name}" +
+                            "\nparam: $param" +
+                            "\nthrow:$throwable"
+                )
+            }
         }
         externalLogger?.addLog(method, param, throwable)
     }

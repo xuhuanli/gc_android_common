@@ -10,5 +10,5 @@ package com.igancao.hpt_jsbridge
 
 object JsBridgeConfig {
     var bridgeName: String = "webView" //  js调用java的接口名称
-    var enableLog: Boolean = true // 是否开启日志
+    var enableLog: Boolean = false // 是否开启日志
 }
