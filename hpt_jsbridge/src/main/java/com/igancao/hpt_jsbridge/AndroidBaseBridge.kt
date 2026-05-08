@@ -131,7 +131,25 @@ open class AndroidBaseBridge(
                 )
             ) {
                 is BridgeHandleResult.Handled -> {
-                    syncResult = result.syncReturn ?: "{}"
+                    val rawData = result.syncReturn
+                    // 解析回 JsonElement，避免被当成字符串再次转义
+                    val dataElement = if (rawData.isNullOrBlank()) {
+                        null
+                    } else {
+                        try {
+                            JsonParser.parseString(rawData)
+                        } catch (e: JsonSyntaxException) {
+                            rawData
+                        }
+                    }
+                    val response = BridgeResponse(
+                        traceId = traceId,
+                        timestamp = System.currentTimeMillis(),
+                        code = 0,
+                        message = "请求成功",
+                        data = dataElement
+                    )
+                    syncResult = JsParamsUtil.toJson(response)
                 }
                 BridgeHandleResult.NotHandled -> {
                     logJsInfo(
