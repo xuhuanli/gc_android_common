@@ -1,0 +1,5 @@
+-keep class com.igancao.hptasr.HptAsr { public *; }
+-keep interface com.igancao.hptasr.AsrListener { *; }
+-keep enum com.igancao.hptasr.AsrSessionState { *; }
+-keep enum com.igancao.hptasr.AsrStateReason { *; }
+-keep class com.igancao.hptasr.bean.** { *; }

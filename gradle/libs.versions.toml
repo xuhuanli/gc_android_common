@@ -8,6 +8,7 @@ huaweiAgcp = "1.9.1.301"
 honorPlugin = "2.0.1.300"
 activity = "1.9.2"
 appcompat = "1.7.0"
+annotation = "1.7.1"
 glide = "4.12.0"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.28" # 前部分需要和kotlin版本号一致
@@ -107,6 +108,7 @@ coreKtx = "1.10.1"
 kotlin-bom = { group = "org.jetbrains.kotlin", name = "kotlin-bom", version.ref = "kotlin" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect" } # 版本由bom指定
 
+
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -121,6 +123,7 @@ lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmode
 lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "lifecycleVersion" }
 lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleVersion" }
 androidx-window = { module = "androidx.window:window", version.ref = "window" }
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
 
 room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 roomKtx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }

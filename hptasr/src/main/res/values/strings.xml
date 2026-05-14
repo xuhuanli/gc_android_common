@@ -1,0 +1,6 @@
+<resources>
+    <string name="hptasr_notification_title">正在录音</string>
+    <string name="hptasr_notification_text">录音服务运行中</string>
+    <string name="hptasr_notification_channel_name">录音通知</string>
+    <string name="hptasr_notification_channel_description">录音后台保活通知</string>
+</resources>

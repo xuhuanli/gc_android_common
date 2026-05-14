@@ -1,36 +1,48 @@
 package com.igancao.hptasr.bean
 
 import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
-
-/**
- * Copyright (c) 2025-12, 甘草医生
- * All rights reserved
- * Author: xuhuanli2017@gmail.com
- */
+import org.json.JSONObject
 
 @Keep
 data class AudioInfo(
-    val format: String, // 音频容器格式
-    val rate: Int, // 音频采样率
-    val channel: Int, // 音频声道数
-    val bits: Int, // 音频采样点位数
-    val duration: Int, //时间
-    val chunkSize: Int // 音频分片大小
-)
+    val format: String,
+    val rate: Int,
+    val channel: Int,
+    val bits: Int,
+    val duration: Int,
+    val chunkSize: Int,
+) {
+    companion object {
+        private const val DEFAULT_FORMAT = "pcm"
+        private const val DEFAULT_DURATION = 200
+        private const val DEFAULT_CHUNK_SIZE = 3200
 
-@Keep
-data class ConfigInfo(
-    @SerializedName("third_party") var thirdParty: String? = "",
-    @SerializedName("audio_meta") val audioMeta: AudioMeta? = null,
-)
-@Keep
-data class AudioMeta(
-    @SerializedName("format") val format: String? = "",
-    @SerializedName("duration") val duration: Int? = 200,
-    @SerializedName("codec") val codec: String? = "",
-    @SerializedName("rate") val rate: Int? = 16000,
-    @SerializedName("bits") val bits: Int? = 16,
-    @SerializedName("channel") val channel: Int? = 1,
-    @SerializedName("chunk_size") val chunkSize: Int? = 3200 // 音频分片大小
-)
+        /**
+         * 从配置 JSON（对应 iOS dataDic）中提取 audio_meta 构造 AudioInfo。
+         *
+         * @throws IllegalArgumentException audio_meta 缺失或 rate/channel/bits 无效
+         */
+        fun fromConfigJson(configJson: JSONObject): AudioInfo {
+            val meta = configJson.optJSONObject("audio_meta")
+                ?: throw IllegalArgumentException("audio_meta is required")
+
+            val rate = requirePositive(meta.optInt("rate", 0), "audio_meta.rate")
+            val channel = requirePositive(meta.optInt("channel", 0), "audio_meta.channel")
+            val bits = requirePositive(meta.optInt("bits", 0), "audio_meta.bits")
+
+            return AudioInfo(
+                format = meta.optString("format").takeIf { it.isNotBlank() } ?: DEFAULT_FORMAT,
+                rate = rate,
+                channel = channel,
+                bits = bits,
+                duration = meta.optInt("duration", 0).takeIf { it > 0 } ?: DEFAULT_DURATION,
+                chunkSize = meta.optInt("chunk_size", 0).takeIf { it > 0 } ?: DEFAULT_CHUNK_SIZE,
+            )
+        }
+
+        private fun requirePositive(value: Int, name: String): Int {
+            require(value > 0) { "$name must be greater than 0" }
+            return value
+        }
+    }
+}

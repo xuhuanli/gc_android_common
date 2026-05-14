@@ -20,11 +20,5 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Keep data models in the bean package to prevent Gson from failing to parse JSON
+# Keep data models in the bean package to prevent R8 from removing public fields
 -keep class com.igancao.hptasr.bean.** { *; }
-
-# Keep Retrofit and Gson specific attributes
--keepattributes Signature
--keepattributes *Annotation*
--keepattributes EnclosingMethod
--keepattributes InnerClasses

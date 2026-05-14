@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
 }
 
 apply(from = "../maven_publish.gradle")
@@ -13,13 +13,14 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
 
         consumerProguardFiles("consumer-rules.pro")
+        buildConfigField("String", "LIBRARY_VERSION", "\"1.2.0\"")
     }
 
     buildTypes {
-        named("release") {
-            isMinifyEnabled = false
+        release {
+            isMinifyEnabled = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android.txt"),
+                getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
@@ -31,20 +32,15 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
+    buildFeatures {
+        buildConfig = true
+    }
 
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    api(libs.gson)
-    api(project(":hptwebsocket"))
-
-    // Retrofit
-    implementation(platform(libs.retrofit.bom))
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.scalars)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.logging.interceptor)
+    implementation(libs.androidx.annotation)
+    api(libs.okhttp3)
+    api(libs.coroutines)
 }

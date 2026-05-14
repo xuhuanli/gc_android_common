@@ -1,137 +1,292 @@
 package com.igancao.hptasr
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import androidx.core.content.ContextCompat
 import com.igancao.hptasr.bean.AudioInfo
-import com.igancao.hptasr.bean.ConfigInfo
-import com.igancao.hptasr.net.RetrofitClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-
-/**
- * HptAsr SDK 入口类
- */
+import com.igancao.hptasr.foreground_service.ForegroundServiceManager
+import com.igancao.hptasr.HptAsrSystemConfig
+import org.json.JSONObject
+import java.util.concurrent.atomic.AtomicLong
 
 internal const val HPT_ASR_TAG = "HptAsr"
 
 object HptAsr {
 
-    // 缓存配置信息
-    private var configInfo: ConfigInfo? = null
+    private val stateLock = Any()
+    private val generation = AtomicLong(0)
 
-    private var asrEngine: AsrEngine? = null
+    @Volatile private var cachedAudioInfo: AudioInfo? = null
+    @Volatile private var asrEngine: AsrEngine? = null
+    @Volatile private var cachedTaskId: String? = null
+    @Volatile private var cachedSocketURL: String? = null
+    @Volatile private var cachedAppContext: Context? = null
+    @Volatile private var currentManagedListener: AsrListener? = null
+    @Volatile private var cachedAutoManageForegroundService = false
 
-    private var taskId: String? = null
+    private data class ActiveSession(
+        val engine: AsrEngine,
+        val taskId: String,
+        val socketURL: String,
+        val appContext: Context,
+        val listener: AsrListener,
+        val autoManageForegroundService: Boolean,
+    )
 
-    /**
-     * SDK 初始化方法
-     * 初始化会自动调用base_config接口获取配置
-     */
-    fun init(thirdParty: String, callback: ((Boolean) -> Unit)? = null) {
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                // Retrofit 会在内部处理 Dispatchers.IO
-                val response = RetrofitClient.apiService.getBaseConfig(thirdParty)
-                Log.d(HPT_ASR_TAG, "Initializing HptAsr, config...${response.data}")
-                if (response.code == 200 || response.code == 0) {
-                    configInfo = response.data
-                    // 确保 third_party 被正确设置，如果接口没返回则使用传入的
-                    if (configInfo?.thirdParty.isNullOrEmpty()) {
-                        configInfo?.thirdParty = thirdParty
-                    }
-                    Log.d(HPT_ASR_TAG, "Config fetched successfully: $configInfo")
-                    callback?.invoke(true)
-                } else {
-                    Log.e(HPT_ASR_TAG, "Init error: ${response.message} (code: ${response.code})")
-                    callback?.invoke(false)
-                }
-            } catch (e: Exception) {
-                Log.e(HPT_ASR_TAG, "Init error: ${e.message}", e)
-                callback?.invoke(false)
-            }
+    fun setUpAudioConfigInfo(configInfo: JSONObject) {
+        val audioInfo = AudioInfo.fromConfigJson(configInfo)
+        synchronized(stateLock) {
+            check(asrEngine == null) { "stop() the current session before calling setUpAudioConfigInfo()" }
         }
+        Log.d(HPT_ASR_TAG, "v${BuildConfig.LIBRARY_VERSION} setUpAudioConfigInfo: $configInfo")
+        cachedAudioInfo = audioInfo
     }
 
-    /**
-     * 创建asr任务
-     * 会自动调用create_task接口生成任务id
-     */
-    fun createAsrTask(callback: ((taskId: String?) -> Unit)? = null) {
-        val thirdParty = configInfo?.thirdParty
-        if (thirdParty.isNullOrEmpty()) {
-            Log.e(HPT_ASR_TAG, "createAsrTask 失败: thirdParty 为空. 请先调用init方法")
-            callback?.invoke(null)
-            return
-        }
-
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val response = RetrofitClient.apiService.createTask(thirdParty)
-                if (response.code == 200 || response.code == 0) {
-                    Log.d(HPT_ASR_TAG, "Task created successfully: ${response.data}")
-                    callback?.invoke(response.data?.taskId)
-                } else {
-                    Log.e(
-                        HPT_ASR_TAG,
-                        "Create task error: ${response.message} (code: ${response.code})"
-                    )
-                    callback?.invoke(null)
-                }
-            } catch (e: Exception) {
-                Log.e(HPT_ASR_TAG, "Create task error: ${e.message}", e)
-                callback?.invoke(null)
-            }
-        }
+    fun setUpAudioRecorderWithTaskId(
+        context: Context,
+        taskId: String,
+        socketURL: String,
+        listener: AsrListener,
+    ) {
+        setUpAudioRecorderWithTaskId(
+            context = context,
+            taskId = taskId,
+            socketURL = socketURL,
+            autoManageForegroundService = false,
+            listener = listener,
+        )
     }
 
-    fun finishAsrTask() {
+    fun setUpAudioRecorderWithTaskId(
+        context: Context,
+        taskId: String,
+        socketURL: String,
+        autoManageForegroundService: Boolean,
+        listener: AsrListener,
+    ) {
+        val audioInfo = synchronized(stateLock) {
+            checkNotNull(cachedAudioInfo) { "call setUpAudioConfigInfo() before setUpAudioRecorderWithTaskId()" }
+            check(asrEngine == null) { "stop() the current session before calling setUpAudioRecorderWithTaskId() again" }
+            cachedAudioInfo!!
+        }
 
+        require(taskId.isNotBlank()) { "taskId must not be blank" }
+        require(socketURL.isNotBlank()) { "socketURL must not be blank" }
+
+        val identifier = HptAsrSystemConfig.identifier
+        val ticket = HptAsrSystemConfig.ticket
+        val typeItemCode = HptAsrSystemConfig.typeItemCode
+        require(identifier.isNotBlank() || (ticket.isNotBlank() && typeItemCode.isNotBlank())) {
+            "identifier or (ticket + typeItemCode) must not be blank"
+        }
+
+        val gen = generation.get()
+        val managed = createManagedListener(listener, gen)
+
+        val engine = AsrEngine(
+            appContext = context.applicationContext,
+            audioInfo = audioInfo,
+            asrListener = managed,
+        )
+
+        synchronized(stateLock) {
+            check(asrEngine == null) { "stop() the current session before calling setUpAudioRecorderWithTaskId() again" }
+            asrEngine = engine
+            cachedTaskId = taskId
+            cachedSocketURL = socketURL
+            cachedAppContext = context.applicationContext
+            currentManagedListener = managed
+            cachedAutoManageForegroundService = autoManageForegroundService
+        }
     }
 
     @RequiresPermission(value = "android.permission.RECORD_AUDIO")
-    fun startAsr(config: ConfigInfo, asrListener: AsrListener) {
-        // 优化：处理可能的类型转换并从 config 获取参数
-        val audioInfo = AudioInfo(
-            format = "pcm",
-            rate = config.audioMeta?.rate ?: 16000,
-            channel = config.audioMeta?.channel ?: 1,
-            bits = config.audioMeta?.bits ?: 16,
-            duration = config.audioMeta?.duration ?: 200,
-            chunkSize = config.audioMeta?.chunkSize ?: 3200
-        )
-        asrEngine = AsrEngine(audioInfo = audioInfo, asrListener = asrListener)
-        createAsrTask { taskId ->
-            if (!taskId.isNullOrEmpty()) {
-                this.taskId = taskId
-                // 开启asr引擎
-                asrEngine?.start(taskId = taskId)
-            } else {
-                asrListener.onError("创建任务失败")
+    fun start() {
+        val session = synchronized(stateLock) {
+            val e = asrEngine ?: return@synchronized null
+            val t = cachedTaskId ?: return@synchronized null
+            val u = cachedSocketURL ?: return@synchronized null
+            val a = cachedAppContext ?: return@synchronized null
+            val l = currentManagedListener ?: return@synchronized null
+            ActiveSession(e, t, u, a, l, cachedAutoManageForegroundService)
+        } ?: throw IllegalStateException("call setUpAudioRecorderWithTaskId() first")
+
+        val permissionDenied = ContextCompat.checkSelfPermission(
+            session.appContext,
+            Manifest.permission.RECORD_AUDIO,
+        ) != PackageManager.PERMISSION_GRANTED
+        if (permissionDenied) {
+            stopManagedForegroundService(session)
+            session.listener.onSessionError("RECORD_AUDIO permission not granted")
+            session.listener.onStateChanged(AsrSessionState.ENDED, AsrStateReason.ERROR)
+            synchronized(stateLock) {
+                if (asrEngine === session.engine) {
+                    clearSessionLocked()
+                }
+            }
+            return
+        }
+
+        when {
+            session.engine.isActiveOrInFlight() -> {
+                Log.w(HPT_ASR_TAG, "start() ignored: session already active or in-flight")
+            }
+            session.engine.isPausedOrPausing() -> {
+                if (!startManagedForegroundService(session, endSessionOnFailure = false)) return
+                session.engine.resume()
+            }
+            else -> {
+                if (!startManagedForegroundService(session, endSessionOnFailure = true)) return
+                val started = session.engine.start(taskId = session.taskId, url = session.socketURL)
+                if (!started) {
+                    stopManagedForegroundService(session)
+                    synchronized(stateLock) {
+                        if (asrEngine === session.engine) {
+                            clearSessionLocked()
+                        }
+                    }
+                }
             }
         }
     }
 
-    /**
-     * 暂停录音
-     */
-    fun pauseAsr() {
+    fun pause() {
+        val appContext = synchronized(stateLock) {
+            asrEngine ?: return
+            cachedAppContext.takeIf { cachedAutoManageForegroundService }
+        }
         asrEngine?.pause()
-    }
-
-    fun resumeAsr() {
-        asrEngine?.resume()
+        appContext?.let { ForegroundServiceManager.stop(it) }
     }
 
     /**
-     * 停止录音
+     * 结束当前会话并释放资源。
+     *
+     * 该方法是同步调用，停止录音时可能短暂等待采集线程退出，建议在非主线程调用。
      */
-    fun stopAsr() {
-        asrEngine?.stop()
+    fun stop() {
+        stopInternal(AsrStateReason.NORMAL_STOP)
     }
 
-    /**
-     * 获取缓存的配置
-     */
-    fun getConfigInfo(): ConfigInfo? = configInfo
+    internal fun handleHostTaskRemoved() {
+        stopInternal(AsrStateReason.APP_TASK_REMOVED)
+    }
+
+    private fun stopInternal(reason: AsrStateReason) {
+        val appContextToStop = synchronized(stateLock) {
+            cachedAppContext.takeIf { cachedAutoManageForegroundService }
+        }
+        val engineToStop = synchronized(stateLock) { asrEngine }
+        engineToStop?.stop(reason)
+        appContextToStop?.let { ForegroundServiceManager.stop(it) }
+        synchronized(stateLock) {
+            if (asrEngine === engineToStop) {
+                clearSessionLocked()
+            }
+        }
+    }
+
+    private fun startManagedForegroundService(
+        session: ActiveSession,
+        endSessionOnFailure: Boolean,
+    ): Boolean {
+        if (!session.autoManageForegroundService) return true
+        if (ForegroundServiceManager.start(session.appContext)) return true
+
+        session.listener.onSessionError("Foreground service start failed")
+        if (endSessionOnFailure) {
+            session.listener.onStateChanged(AsrSessionState.ENDED, AsrStateReason.ERROR)
+            synchronized(stateLock) {
+                if (asrEngine === session.engine) {
+                    clearSessionLocked()
+                }
+            }
+        }
+        return false
+    }
+
+    private fun stopManagedForegroundService(session: ActiveSession) {
+        if (session.autoManageForegroundService) {
+            ForegroundServiceManager.stop(session.appContext)
+        }
+    }
+
+    private fun clearSessionLocked() {
+        generation.incrementAndGet()
+        asrEngine = null
+        cachedTaskId = null
+        cachedSocketURL = null
+        cachedAppContext = null
+        currentManagedListener = null
+        cachedAutoManageForegroundService = false
+    }
+
+    private fun createManagedListener(delegate: AsrListener, gen: Long): AsrListener {
+        return object : AsrListener {
+            override fun onReady() {
+                if (isCurrentGen(gen)) delegate.onReady()
+            }
+
+            override fun onWsMessage(text: String) {
+                if (isCurrentGen(gen)) delegate.onWsMessage(text)
+            }
+
+            override fun onSessionError(error: String) {
+                if (isCurrentGen(gen)) delegate.onSessionError(error)
+            }
+
+            override fun onDecibelsChanged(db: Double) {
+                if (isCurrentGen(gen)) delegate.onDecibelsChanged(db)
+            }
+
+            override fun onRecordingDurationChanged(durationSeconds: Double) {
+                if (isCurrentGen(gen)) delegate.onRecordingDurationChanged(durationSeconds)
+            }
+
+            override fun onWsOpen() {
+                if (isCurrentGen(gen)) delegate.onWsOpen()
+            }
+
+            override fun onWsClosed(code: Int, reason: String) {
+                if (isCurrentGen(gen)) delegate.onWsClosed(code, reason)
+            }
+
+            override fun onWsFailure(error: String, code: Int?) {
+                if (isCurrentGen(gen)) delegate.onWsFailure(error, code)
+            }
+
+            override fun onStateChanged(state: AsrSessionState, reason: AsrStateReason) {
+                var appContextToStop: Context? = null
+                val deliver = synchronized(stateLock) {
+                    val ok = isCurrentGenLocked(gen)
+                    if (ok && cachedAutoManageForegroundService) {
+                        when {
+                            state == AsrSessionState.ENDED -> {
+                                appContextToStop = cachedAppContext
+                                clearSessionLocked()
+                            }
+                            state == AsrSessionState.PAUSED &&
+                                reason != AsrStateReason.AUDIO_FOCUS_LOSS_TRANSIENT -> {
+                                appContextToStop = cachedAppContext
+                            }
+                        }
+                    } else if (state == AsrSessionState.ENDED && ok) {
+                        clearSessionLocked()
+                    }
+                    ok
+                }
+                appContextToStop?.let { ForegroundServiceManager.stop(it) }
+                if (deliver) delegate.onStateChanged(state, reason)
+            }
+        }
+    }
+
+    private fun isCurrentGen(gen: Long): Boolean =
+        synchronized(stateLock) { isCurrentGenLocked(gen) }
+
+    private fun isCurrentGenLocked(gen: Long): Boolean =
+        generation.get() == gen && asrEngine != null
 }
